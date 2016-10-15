@@ -11,6 +11,17 @@
 		DB4382491DA49B7F00F0FCE3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382481DA49B7F00F0FCE3 /* ViewController.swift */; };
 		DB43824B1DA49B7F00F0FCE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB43824A1DA49B7F00F0FCE3 /* Assets.xcassets */; };
 		DB43824E1DA49B7F00F0FCE3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DB43824C1DA49B7F00F0FCE3 /* Main.storyboard */; };
+		DB4382571DA49BB900F0FCE3 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382561DA49BB900F0FCE3 /* Connection.swift */; };
+		DB4382591DA49C3B00F0FCE3 /* Site.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382581DA49C3B00F0FCE3 /* Site.swift */; };
+		DB43825C1DA49D4900F0FCE3 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43825B1DA49D4900F0FCE3 /* Encoder.swift */; };
+		DBC2D19D1DA4A72700B7EED7 /* GlobalConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */; };
+		DBC2D19F1DA4A80100B7EED7 /* CommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */; };
+		DBC2D1A11DA4AB2000B7EED7 /* Terminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1A01DA4AB2000B7EED7 /* Terminal.swift */; };
+		DBC2D1A31DA4B1CA00B7EED7 /* TerminalFeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1A21DA4B1CA00B7EED7 /* TerminalFeeder.swift */; };
+		DBC2D1A51DA4B2E700B7EED7 /* PTY.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1A41DA4B2E700B7EED7 /* PTY.swift */; };
+		DBC2D1A81DA4E9E400B7EED7 /* MessageDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1A71DA4E9E400B7EED7 /* MessageDelegate.swift */; };
+		DBC2D1AB1DA4FB5200B7EED7 /* Proxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1AA1DA4FB5200B7EED7 /* Proxy.swift */; };
+		DBC2D1B01DA5FF0E00B7EED7 /* TermView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1AF1DA5FF0E00B7EED7 /* TermView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +31,17 @@
 		DB43824A1DA49B7F00F0FCE3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DB43824D1DA49B7F00F0FCE3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DB43824F1DA49B7F00F0FCE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DB4382561DA49BB900F0FCE3 /* Connection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
+		DB4382581DA49C3B00F0FCE3 /* Site.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Site.swift; sourceTree = "<group>"; };
+		DB43825B1DA49D4900F0FCE3 /* Encoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
+		DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConfig.swift; sourceTree = "<group>"; };
+		DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
+		DBC2D1A01DA4AB2000B7EED7 /* Terminal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Terminal.swift; sourceTree = "<group>"; };
+		DBC2D1A21DA4B1CA00B7EED7 /* TerminalFeeder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TerminalFeeder.swift; sourceTree = "<group>"; };
+		DBC2D1A41DA4B2E700B7EED7 /* PTY.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PTY.swift; sourceTree = "<group>"; };
+		DBC2D1A71DA4E9E400B7EED7 /* MessageDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageDelegate.swift; sourceTree = "<group>"; };
+		DBC2D1AA1DA4FB5200B7EED7 /* Proxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Proxy.swift; sourceTree = "<group>"; };
+		DBC2D1AF1DA5FF0E00B7EED7 /* TermView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TermView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +74,10 @@
 		DB4382451DA49B7F00F0FCE3 /* swelly */ = {
 			isa = PBXGroup;
 			children = (
+				DB4382551DA49B8C00F0FCE3 /* Model */,
+				DBC2D1AC1DA5FECD00B7EED7 /* Views */,
+				DB43825A1DA49D3100F0FCE3 /* Constants & Utilities */,
+				DBC2D1A91DA4FB1600B7EED7 /* Feature */,
 				DB4382461DA49B7F00F0FCE3 /* AppDelegate.swift */,
 				DB4382481DA49B7F00F0FCE3 /* ViewController.swift */,
 				DB43824A1DA49B7F00F0FCE3 /* Assets.xcassets */,
@@ -59,6 +85,69 @@
 				DB43824F1DA49B7F00F0FCE3 /* Info.plist */,
 			);
 			path = swelly;
+			sourceTree = "<group>";
+		};
+		DB4382551DA49B8C00F0FCE3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				DB4382561DA49BB900F0FCE3 /* Connection.swift */,
+				DBC2D1A41DA4B2E700B7EED7 /* PTY.swift */,
+				DBC2D1A01DA4AB2000B7EED7 /* Terminal.swift */,
+				DBC2D1A21DA4B1CA00B7EED7 /* TerminalFeeder.swift */,
+				DB4382581DA49C3B00F0FCE3 /* Site.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		DB43825A1DA49D3100F0FCE3 /* Constants & Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DB43825B1DA49D4900F0FCE3 /* Encoder.swift */,
+				DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */,
+				DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */,
+			);
+			name = "Constants & Utilities";
+			sourceTree = "<group>";
+		};
+		DBC2D1A61DA4E9D000B7EED7 /* Message */ = {
+			isa = PBXGroup;
+			children = (
+				DBC2D1A71DA4E9E400B7EED7 /* MessageDelegate.swift */,
+			);
+			name = Message;
+			sourceTree = "<group>";
+		};
+		DBC2D1A91DA4FB1600B7EED7 /* Feature */ = {
+			isa = PBXGroup;
+			children = (
+				DBC2D1A61DA4E9D000B7EED7 /* Message */,
+				DBC2D1AA1DA4FB5200B7EED7 /* Proxy.swift */,
+			);
+			name = Feature;
+			sourceTree = "<group>";
+		};
+		DBC2D1AC1DA5FECD00B7EED7 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DBC2D1AE1DA5FEDE00B7EED7 /* Tab View */,
+				DBC2D1AD1DA5FED400B7EED7 /* Terminal View */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		DBC2D1AD1DA5FED400B7EED7 /* Terminal View */ = {
+			isa = PBXGroup;
+			children = (
+				DBC2D1AF1DA5FF0E00B7EED7 /* TermView.swift */,
+			);
+			name = "Terminal View";
+			sourceTree = "<group>";
+		};
+		DBC2D1AE1DA5FEDE00B7EED7 /* Tab View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Tab View";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -133,6 +222,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				DB4382491DA49B7F00F0FCE3 /* ViewController.swift in Sources */,
+				DBC2D1A51DA4B2E700B7EED7 /* PTY.swift in Sources */,
+				DBC2D19F1DA4A80100B7EED7 /* CommonTypes.swift in Sources */,
+				DB4382571DA49BB900F0FCE3 /* Connection.swift in Sources */,
+				DBC2D1AB1DA4FB5200B7EED7 /* Proxy.swift in Sources */,
+				DBC2D19D1DA4A72700B7EED7 /* GlobalConfig.swift in Sources */,
+				DB43825C1DA49D4900F0FCE3 /* Encoder.swift in Sources */,
+				DBC2D1A31DA4B1CA00B7EED7 /* TerminalFeeder.swift in Sources */,
+				DBC2D1B01DA5FF0E00B7EED7 /* TermView.swift in Sources */,
+				DBC2D1A81DA4E9E400B7EED7 /* MessageDelegate.swift in Sources */,
+				DBC2D1A11DA4AB2000B7EED7 /* Terminal.swift in Sources */,
+				DB4382591DA49C3B00F0FCE3 /* Site.swift in Sources */,
 				DB4382471DA49B7F00F0FCE3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -288,6 +388,7 @@
 				DB4382541DA49B7F00F0FCE3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
