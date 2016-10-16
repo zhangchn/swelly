@@ -147,6 +147,7 @@ let CSI_DECSTBM : UInt8 = 0x72 // r, Set Top and Bottom Margins
 let CSI_SCP : UInt8 = 0x73 // s, Saves the cursor position.
 let CSI_RCP : UInt8 = 0x75 // u, Restores the cursor position.
 
+func isParameter(c: UInt8) -> Bool { return (c >= 0x30 && c <= 0x3F) }
 
 class TerminalFeeder {
     var hasNewMessage = false
@@ -195,9 +196,6 @@ class TerminalFeeder {
     }
     static var gEmptyAttr = Cell.Attribute(rawValue: 0)!
     func clear(row: Int) {
-        
-    }
-    func clearRow(row: Int) {
         clear(row: row, from: 0, to: column - 1)
     }
 
@@ -247,7 +245,7 @@ class TerminalFeeder {
     }
     
     func feed(bytes: UnsafePointer<UInt8>, length len: Int, connection: Connection) {
-        var x: Int
+//        var x: Int
         var peek = false
         if let term = terminal {
             if term.bbsType == .Firebird {
@@ -281,7 +279,7 @@ class TerminalFeeder {
                         cursorX = 0
                     }
                     if cursorY == scrollEndRow {
-                        clearRow(row: scrollBeginRow)
+                        clear(row: scrollBeginRow)
                         
                         for x in scrollBeginRow..<scrollEndRow {
                             grid[x] = grid[x + 1]
@@ -330,7 +328,7 @@ class TerminalFeeder {
                         for x in ((scrollBeginRow+1)...scrollEndRow).reversed() {
                             grid[x] = grid[x - 1]
                         }
-                        clearRow(row: scrollBeginRow)
+                        clear(row: scrollBeginRow)
                         terminal?.setAllDirty()
                     } else {
                         cursorY -= 1
@@ -342,7 +340,7 @@ class TerminalFeeder {
                     state = .TP_NORMAL
                 case ESC_IND:
                     if (cursorY == scrollEndRow) {
-                        clearRow(row: scrollBeginRow)
+                        clear(row: scrollBeginRow)
                         
                         for x in scrollBeginRow ..< scrollEndRow {
                             grid[x] = grid[x + 1]
@@ -392,7 +390,7 @@ class TerminalFeeder {
                 case ESC_NEL:
                     cursorX = 0
                     if cursorY == scrollEndRow {
-                        clearRow(row: scrollBeginRow)
+                        clear(row: scrollBeginRow)
                         
                         for x in scrollBeginRow..<scrollEndRow {
                             grid[x] = grid[x + 1]
@@ -418,13 +416,499 @@ class TerminalFeeder {
                 }
             case .TP_CONTROL:
                 // TODO:
+                if isParameter(c: c) {
+                    csBuf.append(Int(c))
+                    if c >= "0".utf8.first! && c <= "9".utf8.first! {
+                        csTemp = csTemp * 10 + Int(c - "0".utf8.first!)
+                    } else if c == "?".utf8.first! {
+                        csArg.append(-1)
+                        csTemp = 0
+                        csBuf = []
+                    } else if !csBuf.isEmpty {
+                        csArg.append(csTemp)
+                        csTemp = 0
+                        csBuf = []
+                    }
+                } else if c == ASC_BS { // Backspace eats previous parameter.
+                    if !csBuf.isEmpty {
+                        csArg.removeFirst()
+                    }
+                } else if c == ASC_VT {// Virtical Tabulation
+                    if modeLNM == false {
+                        cursorX = 0
+                    }
+                    if cursorY == scrollEndRow {
+                        for x in scrollBeginRow..<scrollEndRow {
+                            grid[x] = grid[x + 1]
+                        }
+                        clear(row: scrollEndRow)
+                        terminal?.setAllDirty() // We might not need to set everything dirty.
+                    } else {
+                        cursorY += 1
+                        if cursorY >= row {
+                            cursorY = row - 1
+                        }
+                    }
+                } else if c == ASC_CR { // CR (Carriage Return)
+                    cursorX = 0
+                } else {
+                    if !csBuf.isEmpty {
+                        csArg.append(csTemp)
+                        csTemp = 0
+                        csBuf = []
+                    }
+                    switch c {
+                    case CSI_ICH:
+                        var p: Int = 1
+                        if let f = csArg.first {
+                            if f >= 1 {
+                                p = f
+                            }
+                        }
+                        for x in ((cursorX + p)...(column - 1)).reversed() {
+                            grid[cursorY][x] = grid[cursorY][x - p]
+                            terminal?.dirty[cursorY][x] = true
+                        }
+                        clear(row: cursorY, from: cursorX, to: cursorX + p - 1)
+                    case CSI_CUU: // Cursor Up
+                        var p: Int = 1
+                        if let f = csArg.first {
+                            if (f > 1) {
+                                p = f
+                            }
+                        }
+                        cursorY -= p
+                        
+                        if modeOriginRelative && cursorY < scrollBeginRow {
+                            cursorY = scrollBeginRow
+                        } else if cursorY < 0 {
+                            cursorY = 0
+                        }
+                    case CSI_CUD:
+                        
+                        var p: Int = 1
+                        if let f = csArg.first {
+                            if (f > 1) {
+                                p = f
+                            }
+                        }
+                        cursorY += p
+                        if modeOriginRelative && cursorY > scrollEndRow {
+                            cursorY = scrollEndRow
+                        } else {
+                            cursorY = min(row - 1, cursorY)
+                        }
+                    case CSI_CUF:
+                        var p = 1
+                        if let f = csArg.first {
+                            if (f > 1) {
+                                p = f
+                            }
+                        }
+                        cursorX += p
+                        cursorX = min(cursorX, column - 1)
+                    case CSI_CUB:
+                        var p = 1
+                        if let f = csArg.first {
+                            if (f > 1) {
+                                p = f
+                            }
+                        }
+                        cursorX -= p
+                        cursorX = max(0, cursorX)
+                        
+                    case CSI_CHA: // move to Pn position of current line
+                        var p = 1
+                        if let f = csArg.first {
+                            if f > 1 {
+                                p = f
+                            }
+                            
+                        }
+                        CURSOR_MOVETO(x: p - 1, y: cursorY)
+                    case CSI_HVP, CSI_CUP:
+                        // Cursor Position
+                        /*  ^[H			: go to row 1, column 1
+                         ^[3H		: go to row 3, column 1
+                         ^[3;4H		: go to row 3, column 4 */
+                        switch csArg.count {
+                        case 0:
+                            cursorX = 0
+                            cursorY = 0
+                        case 1:
+                            var p = max(1, csArg.first!)
+                            if modeOriginRelative && scrollBeginRow > 0 {
+                                p += scrollBeginRow
+                                p = min(p, scrollEndRow + 1)
+                            }
+                            CURSOR_MOVETO(x: 0, y: p - 1)
+                        default:
+                            var p = max(1, csArg.removeFirst())
+                            let q = max(1, csArg.first!)
+                            if modeOriginRelative && scrollBeginRow > 0 {
+                                p += scrollBeginRow
+                                p = min(p, scrollEndRow + 1)
+                            }
+                            CURSOR_MOVETO(x: q - 1, y: p - 1)
+                        }
+                    case CSI_ED: // Erase Page (cursor does not move)
+                        /*  ^[J, ^[0J	: clear from cursor position to end
+                         ^[1J		: clear from start to cursor position
+                         ^[2J		: clear all */
+                        if (csArg.isEmpty || csArg[0] == 0) {
+                            // mjhsieh is not comfortable with putting _csArg lookup with
+                            // [_csArg size]==0
+                            clear(row: cursorY, from: cursorX, to: column - 1)
+                            
+                            for j in (cursorY + 1)..<row {
+                                clear(row: j)
+                            }
+                        } else if (!csArg.isEmpty && csArg[0] == 1) {
+                            clear(row: cursorY, from: 0, to: cursorX)
+                            for j in 0..<cursorY {
+                                clear(row: j)
+                            }
+                        } else if (!csArg.isEmpty && csArg[0] == 2) {
+                            clearAll()
+                        }
+                    case CSI_EL: // Erase Line (cursor does not move)
+                        /*
+                         ^[K, ^[0K	: clear from cursor position to end of line
+                         ^[1K		: clear from start of line to cursor position
+                         ^[2K		: clear whole line
+                         */
+                        if (csArg.isEmpty || csArg[0] == 0) {
+                            clear(row: cursorY, from: cursorX, to: column - 1)
+                        } else if (!csArg.isEmpty && csArg[0] == 1) {
+                            clear(row: cursorY, from: 0, to: cursorX)
+                        } else if (!csArg.isEmpty && csArg[0] == 2) {
+                            clear(row: cursorY)
+                        }
+                    case CSI_IL: // Insert Line
+                        var lineNumber = 0;
+                        if csArg.isEmpty {
+                            lineNumber = 1
+                        } else {
+                            lineNumber = csArg[0]
+                        }
+                        if (lineNumber < 1) {
+                            lineNumber = 1; //mjhsieh is paranoid
+                        }
+                        
+                        for _ in 0..<lineNumber {
+//                            cell *emptyRow = [self cellsOfRow: _scrollEndRow];
+                            for r in ((cursorY + 1)...scrollEndRow).reversed() {
+                                grid[r] = grid[r - 1]
+                            }
+                            clear(row:cursorY)
+                        }
+                        for j in cursorY..<scrollEndRow {
+                            terminal?.setDirty(forRow: j)
+                        }
+                    case CSI_DL: // Delete Line
+                        var lineNumber = 0;
+                        if csArg.isEmpty {
+                            lineNumber = 1
+                        } else {
+                            lineNumber = csArg[0]
+                        }
+                        if (lineNumber < 1) {
+                            lineNumber = 1; //mjhsieh is paranoid
+                        }
+                        
+                        for _ in 0..<lineNumber {
+                            for r in cursorY..<scrollEndRow {
+                                grid[r] = grid[r + 1]
+                            }
+                            clear(row:scrollEndRow)
+                        }
+                        for j in cursorY...scrollEndRow {
+                            terminal?.setDirty(forRow: j)
+                        }
+                    case CSI_DCH: // Delete characters at the current cursor position.
+                        var p = 1
+                        if csArg.count == 1 {
+                            p = max(csArg[0], p)
+                        }
+                        for j in cursorX..<column {
+                            if j <= column - 1 - p {
+                                grid[cursorY][j] = grid[cursorY][j+p]
+                            } else {
+                                grid[cursorY][j].byte = 0
+                                grid[cursorY][j].attribute = TerminalFeeder.gEmptyAttr
+                                grid[cursorY][j].attribute.bgColor = UInt8(bgColor)
+                            }
+                            terminal?.dirty[cursorY][j] = true
+                        }
+
+                    case CSI_HPA: // goto to absolute character position
+                        var p = 0
+                        if let f = csArg.first {
+                            p = max(f - 1, p)
+                        }
+                        CURSOR_MOVETO(x: p,y: cursorY)
+                    case CSI_HPR: // goto to the next position of the line
+                        var p = 1;
+                        if let f = csArg.first {
+                            p = max(p, f)
+                        }
+                        CURSOR_MOVETO(x: cursorX+p, y: cursorY);
+
+                    case CSI_DA: // Computer requests terminal identify itself.
+                        var data : Data
+                        switch emustd {
+                        case .VT100:
+                            data = Data(bytes: [0x1B, 0x5B, 0x3F, 0x31, 0x3B, 0x30, 0x63])
+                        case .VT102:
+                            data = Data(bytes: [0x1B, 0x5B, 0x3F, 0x36, 0x63])
+                        }
+                        if csArg.isEmpty || (csArg.count == 1 && csArg[0] == 0){
+                            connection.sendMessage(msg: data)
+                        }
+                    case CSI_VPA: // move to Pn line, col remaind the same
+                        var p = 0
+                        if let f = csArg.first {
+                            p = max(f - 1, p)
+                        }
+                        CURSOR_MOVETO(x: cursorX, y: p)
+                    case CSI_VPR: // move to Pn Line in forward direction
+                        var p = 1;
+                        if let f = csArg.first {
+                            p = max(p, f)
+                        }
+                        CURSOR_MOVETO(x: cursorX, y: cursorY + p)
+                    case CSI_TBC:
+                        // Clear a tab at the current column
+                        var p = 1
+                        if csArg.count == 1 {
+                            p = csArg[0]
+                        }
+                        if (p == 3) {
+                            NSLog("Ignoring request to clear all horizontal tab stops.")
+                        } else {
+                            NSLog("Ignoring request to clear one horizontal tab stop.")
+                        }
+                    case CSI_SM: // set mode
+                        var doClear = false
+                        while !csArg.isEmpty {
+                            let p = csArg[0]
+                            
+                            if (p == -1) {
+                                _ = csArg.removeFirst()
+                                if csArg.count == 1 {
+                                    let f = csArg[0]
+                                    if (f == 3) { // Set number of columns to 132
+                                        NSLog("132-column mode is not supported.");
+                                        doClear = true
+                                        modeOriginRelative = false
+                                        scrollBeginRow = 0;
+                                        scrollEndRow = row - 1;
+                                    } else if (f == 5 && modeScreenReverse == false) { //Set reverse video on screen
+                                        modeScreenReverse = true
+                                        reverse = !reverse;
+                                        reverseAll()
+                                    } else if (f == 6) { // Set origin to relative
+                                        modeOriginRelative = true
+                                    } else if (f == 7) { // Set auto-wrap mode
+                                        modeWraptext = true
+                                        
+                                    }
+                                }
+                            } else if (p == 20) { // Set new line mode
+                                modeLNM = false
+                            } else if (p == 4) {
+                                // selects insert mode and turns INSERT on. New
+                                // display characters move old display characters
+                                // to the right. Characters moved past the right
+                                // margin are lost.
+                                modeIRM = true
+                                //                      } else if (p == 1) { //When set, the cursor keys send an ESC O prefix, rather than ESC [
+                                //                      } else if (p == 2) { //NSLog(@"ignore setting Keyboard Action Mode (AM)");
+                                //						} else if (p == 6) { //_modeErasure = YES;
+                                //                      } else if (p == 12) { //NSLog(@"ignore re/setting Send/receive (SRM)");
+                            }
+                            _ = csArg.removeFirst()
+                            
+                        }
+                        if doClear {
+                            if modeOriginRelative {
+                                
+                            } else {
+                                clearAll()
+                                cursorX = 0
+                                cursorY = 0
+                            }
+                        }
+
+                    case CSI_HPB: // move to Pn Location in backward direction, same raw
+                        var p = 1
+                        if let f = csArg.first {
+                            p = max(p, f)
+                        }
+                        CURSOR_MOVETO(x: cursorX - p, y: cursorY)
+                    case CSI_VPB: // move to Pn Line in backward direction
+                        var p = 1
+                        if let f = csArg.first {
+                            p = max(f, p)
+                        }
+                        CURSOR_MOVETO(x: cursorX, y: cursorY-p)
+                    case CSI_RM: // reset mode
+                        var doClear = false
+                        while !csArg.isEmpty {
+                            let p = csArg[0]
+                            if (p == -1) {
+                                _ = csArg.removeFirst()
+                                if csArg.count == 1 {
+                                    let f = csArg[0]
+                                    if (f == 3) { // Set number of columns to 80
+                                        //NSLog(@"132-column mode (re)setting are not supported.");
+                                        doClear = true
+                                        modeOriginRelative = false
+                                        scrollBeginRow = 0;
+                                        scrollEndRow = row - 1;
+                                    } else if (p == 5 && modeScreenReverse) { // Set non-reverse video on screen
+                                        modeScreenReverse = false
+                                        reverse = !reverse;
+                                        reverseAll()
+                                    } else if (p == 6) { // Set origin to absolute
+                                        modeOriginRelative = false
+                                    } else if (p == 7) { // Reset auto-wrap mode (disable)
+                                        modeWraptext = false
+                                        //							    } else if (p == 1) { // Set cursor key to cursor
+                                        //								} else if (p == 4) { // Set jump scrolling
+                                        //								} else if (p == 8) { // Reset auto-repeat mode
+                                        //								} else if (p == 9) { // Reset interlacing mode
+                                    }
+                                }
+                            } else if (p == 20) { // set line feed mode
+                                modeLNM = true
+                            } else if (p == 4) {
+                                // selects replace mode and turns INSERT off. New
+                                // display characters replace old display characters
+                                // at cursor position. The old character is erased.
+                                modeIRM = false
+                                //						} else if (p == 6) { //_modeErasure = NO;
+                            }
+                            _ = csArg.removeFirst()
+                        }
+                        if doClear {
+                            clearAll()
+                            cursorX = 0
+                            cursorY = 0
+                        }
+
+                    case CSI_SGR:
+                        // Character Attributes
+                        if csArg.isEmpty { // clear
+                            fgColor = 7
+                            bgColor = 9
+                            bold = false
+                            underline = false
+                            blink = false
+                            reverse = !modeScreenReverse
+                        } else {
+                            while !csArg.isEmpty {
+                                let p = csArg.removeFirst()
+                                switch p {
+                                case 0:
+                                    fgColor = 7
+                                    bgColor = 9
+                                    bold = false
+                                    underline = false
+                                    blink = false
+                                    reverse = !modeScreenReverse
+                                case 30...39:
+                                    fgColor = p - 30
+                                case 40...49:
+                                    bgColor = p - 40
+                                case 1:
+                                    bold = true
+                                case 4:
+                                    underline = true
+                                case 5:
+                                    blink = true
+                                case 7:
+                                    reverse = modeScreenReverse
+                                default:
+                                    break
+                                }
+                            }
+                        }
+                    case CSI_DSR:
+                        if csArg.count == 1{
+                            let f = csArg[0]
+                            switch f {
+                            case 5:
+                                // Report Device OK	<ESC>[0n
+                                connection.sendMessage(msg: Data(bytes:[0x1B, 0x5B, 0x30, CSI_DSR]))
+                            case 6:	// Report Device OK	<ESC>[y;xR
+
+                                var data = Data(bytes:[0x1B, 0x5B])
+                                if (cursorY + 1) / 10 >= 1 {
+                                    data.append(0x30 + UInt8((cursorY + 1)/10))
+                                }
+                                data.append(0x30 + UInt8((cursorY + 1) % 10))
+                                data.append(0x3B)
+                                if (cursorX + 1 )/10 >= 1 {
+                                    data.append(0x30 + UInt8((cursorX + 1)/10))
+                                }
+                                data.append(0x30 + UInt8((cursorX + 1) % 10))
+                                data.append(CSI_CPR)
+                                connection.sendMessage(msg: data)
+                            default:
+                                break
+                            }
+                        }
+                    case CSI_DECSTBM: // Assigning Scrolling Region
+                        switch csArg.count {
+                        case 0:
+                            scrollBeginRow = 0
+                            scrollEndRow = row - 1
+                        case 2:
+                            let s = min(csArg[0], csArg[1])
+                            let e = max(csArg[0], csArg[1])
+                            scrollBeginRow = s - 1
+                            scrollEndRow = e - 1
+                        default:
+                            break
+                        }
+                        cursorX = 0
+                        cursorY = scrollBeginRow;
+                    case CSI_SCP:
+                        savedCursorX = cursorX
+                        savedCursorY = cursorY
+
+                    case CSI_RCP:
+                        if savedCursorX >= 0 && savedCursorY >= 0 {
+                            cursorX = savedCursorX
+                            cursorY = savedCursorY
+                        }
+                    default:
+                        NSLog("unsupported control sequence: 0x%X", c)
+                    }
+                    csArg = []
+                    state = .TP_NORMAL
+                }
+                
+                
                 csArg = []
                 state = .TP_NORMAL
             case .TP_SCS:
                 state = .TP_NORMAL
             }
         }
+        terminal?.cursorColumn = cursorX
+        terminal?.cursorRow = cursorY
+        terminal?.feed(grid: grid)
+        if hasNewMessage {
+            // TODO: new incoming message
+        }
     }
+    func  CURSOR_MOVETO(x: Int, y: Int) {
+        cursorX = min(max(x, 0), column - 1)
+        cursorY = min(max(y, 0), row - 1)
+    }
+    
     
     
     weak var terminal: Terminal?

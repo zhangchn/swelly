@@ -167,4 +167,8 @@ class Terminal {
             grid[row][c].attribute.doubleByte = UInt8(db)
         }
     }
+    
+    func feed(grid: [[Cell]]) {
+        // TODO:
+    }
 }
