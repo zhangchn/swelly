@@ -899,7 +899,7 @@ class TerminalFeeder {
         }
         terminal?.cursorColumn = cursorX
         terminal?.cursorRow = cursorY
-        terminal?.feed(grid: grid)
+        terminal?.feed(grid: &grid)
         if hasNewMessage {
             // TODO: new incoming message
         }

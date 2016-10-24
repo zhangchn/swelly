@@ -40,6 +40,21 @@ class GlobalConfig {
     var chineseFontName: String
     var englishFontName: String
     
+    var englishFont: CTFont!
+    var chineseFont: CTFont!
+
+    var cCTAttribute: [[[String: Any]]]!
+    var eCTAttribute: [[[String: Any]]]!
+    var colorTable: [[NSColor]]!
+    
+    var colorBG: NSColor {
+        get { return colorTable[0][9] }
+        set {
+            colorTable[0][9] = newValue.usingColorSpaceName(NSCalibratedRGBColorSpace)!
+            UserDefaults.standard.set(NSArchiver.archivedData(withRootObject: newValue), forKey: "ColorBG")
+
+        }
+    }
     init() {
         let defaults = UserDefaults.standard
         showHiddenText = defaults.bool(forKey: "ShowHiddenText")
@@ -70,6 +85,10 @@ class GlobalConfig {
         }
     }
     func restoreSettings() {
+        
+    }
+    
+    func refreshFonts() {
         
     }
 }

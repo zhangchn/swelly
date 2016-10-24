@@ -129,8 +129,8 @@
 		DBC2D1AC1DA5FECD00B7EED7 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DBC2D1AE1DA5FEDE00B7EED7 /* Tab View */,
 				DBC2D1AD1DA5FED400B7EED7 /* Terminal View */,
+				DBC2D1AE1DA5FEDE00B7EED7 /* Tab View */,
 			);
 			name = Views;
 			sourceTree = "<group>";

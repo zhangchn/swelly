@@ -141,6 +141,11 @@ class Terminal {
     func cells(ofRow row: Int) -> [Cell] {
         return grid[row]
     }
+    
+    func withCells<R>(ofRow row: Int, block : ([Cell]) -> R) -> R{
+        return block(grid[row])
+    }
+    
     func cell(atIndex index: Int) -> Cell {
         return grid[index / maxColumn][index % maxColumn]
     }
@@ -168,7 +173,22 @@ class Terminal {
         }
     }
     
-    func feed(grid: [[Cell]]) {
-        // TODO:
+    func feed(grid: inout [[Cell]]) {
+        for i in 0..<maxRow {
+            self.grid[i] = grid[i]
+        }
+        for i in 0..<maxRow {
+            updateDoubleByteStateForRow(row: i)
+        }
+        updateBBSState()
+        notifyObservers()
+    }
+    // TODO:
+    func updateBBSState() {
+        
+    }
+    // TODO:
+    func notifyObservers() {
+        
     }
 }

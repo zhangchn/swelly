@@ -109,3 +109,11 @@ enum BBSType {
     case Maple
     case Unix
 }
+
+func fgColorIndexOfAttribute(_ a: Cell.Attribute) -> UInt8 {
+    return a.reverse ? a.bgColor : a.fgColor
+}
+
+func fgBoldOfAttribute(_ a: Cell.Attribute) -> Bool {
+    return !a.reverse && a.bold
+}
