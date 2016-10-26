@@ -91,4 +91,15 @@ class GlobalConfig {
     func refreshFonts() {
         
     }
+    
+    func color(atIndex i: Int, highlight: Bool) -> NSColor {
+        if i >= 0 && i < 10 {
+            return colorTable[highlight ? 1 : 0][i]
+        } else {
+            return colorTable[0][10 - 1]
+        }
+    }
+    func bgColor(atIndex i: Int, highlight: Bool) -> NSColor {
+        return color(atIndex: i, highlight: highlight).withAlphaComponent(colorBG.alphaComponent)
+    }
 }

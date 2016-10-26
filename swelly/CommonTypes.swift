@@ -114,6 +114,20 @@ func fgColorIndexOfAttribute(_ a: Cell.Attribute) -> UInt8 {
     return a.reverse ? a.bgColor : a.fgColor
 }
 
+func bgColorIndexOfAttribute(_ a: Cell.Attribute) -> UInt8 {
+    return a.reverse ? a.fgColor : a.bgColor
+}
+
+func bgBoldOfAttribute(_ a: Cell.Attribute) -> Bool {
+    return (a.reverse && a.bold);
+}
+
+
 func fgBoldOfAttribute(_ a: Cell.Attribute) -> Bool {
     return !a.reverse && a.bold
+}
+
+func isHiddenAttribute(_ a: Cell.Attribute) -> Bool {
+    return (!a.bold && ((a.fgColor == a.bgColor) ||
+        (a.fgColor == 0 && a.bgColor == 9)));
 }
