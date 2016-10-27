@@ -137,7 +137,7 @@ class TermView: NSView {
         let cPaddingBottom = config.chineseFontPaddingBottom
         let cPaddingLeft = config.chineseFontPaddingLeft
         let cCTFont = config.chineseFont
-        var end = start
+        let end = start
         var buffer = [(Bool, Bool, unichar, Int)]()
         var textBytes = Data()
         var positions = [CGPoint]()
