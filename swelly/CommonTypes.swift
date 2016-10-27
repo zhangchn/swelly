@@ -131,3 +131,7 @@ func isHiddenAttribute(_ a: Cell.Attribute) -> Bool {
     return (!a.bold && ((a.fgColor == a.bgColor) ||
         (a.fgColor == 0 && a.bgColor == 9)));
 }
+
+func isBlinkCell(_ c: Cell) -> Bool {
+    return c.attribute.blink && (c.attribute.doubleByte != 0 || (c.byte != 0x20 && c.byte != 0x0))
+}

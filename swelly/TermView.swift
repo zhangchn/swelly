@@ -109,11 +109,67 @@ class TermView: NSView {
         
     }
     
-    private func updateBackground(row:Int, from start:Int, to end: Int) {
+    private func updateBackground(row: Int, from start: Int, to end: Int) {
+//        int c;
+//        cell *currRow = [[self frontMostTerminal] cellsOfRow:r];
+        guard let ds = frontMostTerminal else {return }
+        ds.withCells(ofRow: row) { cells in
+            let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
+            var lastAttr = cells[start].attribute
+            var length = 0
+            var currAttr : Cell.Attribute!
+            var currentBackgroundColor = UInt8(0)
+            var currentBold = false
+            var lastBackgroundColor = bgColorIndexOfAttribute(lastAttr)
+            var lastBold = bgBoldOfAttribute(lastAttr)
+            for c in start...end {
+                if c < end {
+                    currAttr = cells[c].attribute
+                    currentBackgroundColor = bgColorIndexOfAttribute(currAttr)
+                    currentBold = bgBoldOfAttribute(currAttr)
+                }
+                if (currentBackgroundColor != lastBackgroundColor || currentBold != lastBold || c == end) {
+                    let rect = NSMakeRect(CGFloat(c - length) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, fontWidth * CGFloat(length), fontHeight)
+                    // Modified by K.O.ed: All background color use same alpha setting.
+                    let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
+                    bgColor.set()
+                    NSRectFill(rect)
+                    /* finish this segment */
+                    length = 1
+                    lastAttr = currAttr
+                    lastBackgroundColor = currentBackgroundColor
+                    lastBold = currentBold
+                } else {
+                    length += 1
+                }
+            }
+            setNeedsDisplay(rowRect)
+        }
         
     }
     private func drawBlink() {
+        let config = GlobalConfig.sharedInstance
+        if !config.blinkTicker {
+            return
+        }
+        guard let ds = frontMostTerminal else {
+            return
+        }
         
+        for r in 0..<maxRow {
+            ds.withCells(ofRow: r) { cells in
+                for c in 0..<maxColumn {
+                    let cell = cells[c]
+                    if isBlinkCell(cell) {
+                        let bgColorIndex = cell.attribute.reverse ? cell.attribute.fgColor : cell.attribute.bgColor
+                        let bold = cell.attribute.reverse ? cell.attribute.bold : false
+                        let bgColor = config.bgColor(atIndex: Int(bgColorIndex), highlight: bold)
+                        bgColor.set()
+                        NSRectFill(NSMakeRect(CGFloat(c) * fontWidth, CGFloat(maxRow - r - 1) * fontHeight, fontWidth, fontHeight))
+                    }
+                }
+            }
+        }
     }
     private func drawString(row: Int, context: CGContext?) {
         // first dirty position
