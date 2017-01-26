@@ -86,7 +86,78 @@ class Connection : PTYDelegate {
     }
     
     func login() {
+        let addr = site.address
+        let account = addr.utf8
+        if addr.hasPrefix("ssh") {
+            if let ps = account.split(separator: "@".utf8.first!).last?
+                .split(separator: " ".utf8.first!).last?
+                .split(separator: " ".utf8.first!).last {
+                while terminalFeeder.cursorY <= 3 {
+                    sleep(1)
+                    sendMessage(msg: String(ps)!.data(using: .utf8)!)
+                    sendMessage(msg: Data.init(bytes: [0x0d]))
+                }
+            }
+            
+        } else if terminalFeeder.grid[terminalFeeder.cursorY][terminalFeeder.cursorX - 2].byte == "?".utf8.first! {
+            sendMessage(msg: "yes\r".data(using: .ascii)!)
+            sleep(1)
+        }
+        let service = "Welly".data(using: .utf8)
+        service?.withUnsafeBytes() { (buffer : UnsafePointer<Int8>) in
+            let accountData = addr.data(using: .utf8)!
+            accountData.withUnsafeBytes() {(buffer2 : UnsafePointer<Int8>) in
+                var len = UInt32(0)
+                var pass : UnsafeMutableRawPointer? = nil
+                if noErr == SecKeychainFindGenericPassword(nil, UInt32(service!.count), buffer, UInt32(accountData.count), buffer2, &len, &pass, nil) {
+                    sendMessage(msg: Data.init(bytes: pass!, count: Int(len)))
+                    sendMessage(msg: Data.init(bytes: [0x0d]))
+                    SecKeychainItemFreeContent(nil, pass)
+                }
+            }
+        }
         
+    }
+    
+    func send(text: String, delay microsecond: Int = 0) {
+        let s = text.replacingOccurrences(of: "\n", with: "\r")
+        var data = Data()
+        let encoding = site.encoding
+        for ch in s.utf16 {
+            var buf = [UInt8](repeating:0, count: 2)
+            if ch < 0x007f {
+                buf[0] = UInt8(ch)
+                data.append(&buf, count: 1)
+            } else {
+                let code = encodeFromUnicode(ch, to: encoding)
+                if code != 0 {
+                    buf[0] = UInt8(code >> 8)
+                    buf[1] = UInt8(code & 0xff)
+                } else {
+                    if (ch == 8943 && encoding == .gbk) {
+                        // hard code for the ellipsis
+                        buf[0] = 0xa1
+                        buf[1] = 0xad
+                    } else if ch != 0 {
+                        buf[0] = 0x20
+                        buf[1] = 0x20
+                    }
+                }
+                data.append(&buf, count: 2)
+            }
+        }
+        
+        // Now send the message
+        if microsecond == 0 {
+            // send immediately
+            sendMessage(msg: data)
+        } else {
+            // send with delay
+            for i in 0..<data.count {
+                sendMessage(msg: data.subdata(in: i..<(i+1)))
+                usleep(useconds_t(microsecond))
+            }
+        }
     }
     
     func increaseMessageCount(value: Int) {

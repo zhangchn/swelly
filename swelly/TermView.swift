@@ -8,7 +8,8 @@
 
 import AppKit
 
-class TermView: NSView {
+class TermView: NSView, NSTextInput {
+    
     var fontWidth: CGFloat
     
     var fontHeight: CoreGraphics.CGFloat
@@ -21,11 +22,27 @@ class TermView: NSView {
     
     private var y: Int = 0
     
-    private var connection: Connection?
+    var connection: Connection? {
+        didSet {
+            refreshDisplay()
+        }
+    }
     
     private var singleAdvance: [CGSize]!
     private var doubleAdvance: [CGSize]!
     
+    var selectionLength = 0
+    var selectionLocation = 0
+    var inUrlMode = false
+    var isKeying = false
+    var isNotCancelingSelection = true
+    var mouseActive = true
+    var hasRectangleSelected = false
+    var wantsRectangleSelection = false
+    
+    var selectionRange = Range(uncheckedBounds: (lower: 0, upper: 0))
+    // TODO: mouse behavior
+//    var mouseBehaviorDelegate: MouseBehaviorManager!
     //var asciiArtRender
     
     override init(frame: NSRect) {
@@ -39,6 +56,15 @@ class TermView: NSView {
         self.configure()
         // TODO: Register KVO
 
+        // TODO: mouse behavior
+        // mouseBehaviorDelegate = [[WLMouseBehaviorManager alloc] initWithView:self];
+        // TODO: url managers
+        // urlManager = [[WLURLManager alloc] initWithView:self];
+
+        // TODO: 		[_mouseBehaviorDelegate addHandler:_urlManager];
+        // TODO: _activityCheckingTimer
+        // TODO: notification: WLNotificationSiteDidChangeShouldEnableMouse
+        // TODO: notification: WLNotificationSiteDidChangeEncoding
     }
     
     required init?(coder: NSCoder) {
@@ -106,7 +132,7 @@ class TermView: NSView {
     }
     
     private func draw(specialSymbol: UTF16Char, row: Int, column: Int) {
-        
+        // TODO: asciiartrender
     }
     
     private func updateBackground(row: Int, from start: Int, to end: Int) {
@@ -437,7 +463,10 @@ class TermView: NSView {
                 y = ds.cursorRow
             }
             NSBezierPath.setDefaultLineWidth(1.0)
-            
+         
+            if selectionLength != 0 {
+                drawSelection()
+            }
         }
     }
     
@@ -448,4 +477,329 @@ class TermView: NSView {
             }
         }
     }
+    
+    // MARK:
+    override var isFlipped: Bool { get { return false }}
+    override var isOpaque: Bool { get { return true }}
+    override var acceptsFirstResponder: Bool { get { return true }}
+    override var canBecomeKeyView: Bool { get {return true}}
+    override class func defaultMenu() -> NSMenu? {
+        return NSMenu()
+    }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        return self
+    }
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        // TODO: refreshMouseHotspot
+    }
+    override func viewDidMoveToWindow() {
+        self.refreshDisplay()
+        // TODO: refreshMouseHotspot()
+    }
+    
+    override var frame: NSRect {
+        didSet {
+            // TODO:
+//            effectiveView.resize()
+        }
+    }
+    
+    var textField: NSTextField!
+    var markedText: AnyObject?
+}
+
+extension TermView {
+    // MARK: NSTextInput
+    override func insertText(_ insertString: Any) {
+        insert(text: insertString, delay: 0)
+    }
+    func insert(text: Any, delay microsecond: Int) {
+        guard frontMostTerminal != nil && frontMostConnection!.connected else {
+            return
+        }
+        textField.isHidden = true
+        markedText = nil
+        frontMostConnection?.send(text: text as! String, delay: microsecond)
+    }
+    override func doCommand(by selector: Selector) {
+//        var ch = [UInt8](repeating: 0, count: 10)
+        let leftSquare = "[".utf8.first!
+        let tilde = "~".utf8.first!
+        switch selector {
+        case #selector(NSResponder.insertNewline(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x0d]))
+        case #selector(NSResponder.cancelOperation(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x1b]))
+        case #selector(NSResponder.scrollToBeginningOfDocument(_:)), #selector(NSResponder.moveToBeginningOfLine(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x1b, leftSquare, 0x31, tilde]))
+        case #selector(NSResponder.scrollToEndOfDocument(_:)), #selector(NSResponder.moveToEndOfLine(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x1b, leftSquare, 0x34, tilde]))
+        case #selector(NSResponder.scrollPageUp(_:)), #selector(NSResponder.pageUp(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x1b, leftSquare, 0x35, tilde]))
+        case #selector(NSResponder.scrollPageDown(_:)), #selector(NSResponder.pageDown(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x1b, leftSquare, 0x36, tilde]))
+        case #selector(NSResponder.insertTab(_:)):
+            frontMostConnection?.sendMessage(msg: Data([0x09]))
+        case #selector(NSResponder.deleteForward(_:)):
+            if let ds = frontMostTerminal {
+                var d = Data([0x1b, leftSquare, 0x33, tilde])
+                if frontMostConnection?.site.shouldDetectDoubleByte ?? false && ds.cursorColumn < maxColumn - 1 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn + 1).doubleByte == 2 {
+                    d.append(d)
+                }
+                frontMostConnection?.sendMessage(msg: d)
+            }
+        case #selector(NSResponder.insertTabIgnoringFieldEditor(_:)):
+            switchURL()
+        default:
+            NSLog("Unprocessed selector: \(selector)")
+        }
+    }
+    func send(text: String) {
+        clearSelection()
+        frontMostConnection?.send(text: text)
+    }
+    func setMarked(string: String, selected: NSRange) {
+        guard !string.isEmpty else { unmarkText(); return; }
+        if let ds = frontMostTerminal {
+            markedText = string as AnyObject?
+            // TODO:
+            
+        }
+    }
+    func setMarked(text: AnyObject, selected range:NSRange) {
+        if let attrString = text as? NSAttributedString {
+            return setMarked(string: attrString.string, selected: range)
+        } else if let string = text as? String {
+            return setMarked(string: string, selected: range)
+        }
+    }
+    func unmarkText() {
+        // TODO:
+        markedText = nil
+        textField.isHidden = true
+    }
+    var conversationIdentifier: Int {
+        get { return self.hash }
+    }
+}
+
+extension TermView {
+    func confirmPaste(sheet: NSWindow, returnCode: Int, contextInfo: UnsafeRawPointer){
+        if returnCode == NSAlertFirstButtonReturn {
+            performPaste()
+        }
+    }
+    func confirmPasteWrap( sheet: NSWindow, returnCode: Int, contextInfo: UnsafeRawPointer) {
+        if returnCode == NSAlertFirstButtonReturn {
+            performPasteWrap()
+        }
+    }
+    
+    func performPaste() {
+        if let str = NSPasteboard.general().string(forType: NSStringPboardType) {
+            insert(text: str, delay: 0)
+        }
+    }
+    
+    func performPasteWrap() {
+        // TODO:
+//        guard let str = NSPasteboard.general().string(forType: NSStringPboardType) else {return}
+//        let lineWidth = 66
+//        let lPadding = 4
+//        
+    }
+    
+    func drawSelection() {
+        // TODO:
+    }
+    
+}
+
+extension TermView {
+    // MARK: Url Menu
+    func switchURL() {
+        // TODO:
+    }
+    func exitURL() {
+        
+    }
+}
+
+extension TermView {
+    // MARK: Active Timer
+    func hasMouseActivity() {
+        mouseActive = true
+    }
+    func checkActivity(timer: Timer) {
+        if mouseActive {
+            mouseActive = false
+            return
+        } else {
+            // Hide the cursor
+            NSCursor.setHiddenUntilMouseMoves(true)
+            // TODO:
+            // effectView.clear()
+        }
+    }
+}
+
+extension TermView {
+    // MARK: Event handling
+    func clearSelection() {
+        // TODO:
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        hasMouseActivity()
+    }
+    
+    override func swipe(with event: NSEvent) {
+        if frontMostTerminal?.connection?.connected ?? false {
+            if event.deltaY > 0 {
+                frontMostConnection!.sendMessage(msg: termKeyPageUp)
+                return
+            } else if event.deltaY < 0 {
+                frontMostConnection!.sendMessage(msg: termKeyPageDown)
+                return
+            }
+        }
+        super.swipe(with: event)
+    }
+    override func menu(for event: NSEvent) -> NSMenu? {
+        if !connected {
+            return nil
+        }
+        // TODO:
+//        if let s = selectedPlainString() {
+//            return WLContextualMenuManager.menu(selected: s)
+//        } else {
+//            mouseBehaviorDelegate.menu(event: event)
+//        }
+        
+        return nil
+    }
+    override func keyDown(with event: NSEvent) {
+        frontMostConnection?.resetMessageCount()
+        if event.characters?.isEmpty ?? true {
+            // dead key pressed
+            return
+        }
+        guard let c = event.characters?.utf16.first else { return }
+        switch Int(c) {
+        case NSLeftArrowFunctionKey, NSUpArrowFunctionKey:
+            // TODO: effectView.showIndicatorAtPoint(urlManager.movePrev())
+            break
+        case Int(WLTabCharacter), NSRightArrowFunctionKey, NSDownArrowFunctionKey:
+            // TODO:
+            break
+        case Int(WLEscapeCharacter):
+            exitURL()
+            break
+        case Int(WLWhitespaceCharacter), Int(WLReturnCharacter):
+            // TODO:
+            // if urlManager.openCurrentURL:event
+            //    exitUrl()
+            // else {
+            //     effectView.showIndicator(at: urlManager.moveNext())
+            break
+        default:
+            break
+        }
+        clearSelection()
+        var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
+        if let ds = frontMostTerminal {
+            if event.modifierFlags.contains(.control) && !event.modifierFlags.contains(.option) {
+                frontMostConnection?.sendMessage(msg: Data([UInt8(c)]))
+                return
+            }
+            var isArrowKey = true
+            switch Int(c) {
+            case NSUpArrowFunctionKey:
+                arrow[2] = "A".utf8.first!
+                arrow[5] = "A".utf8.first!
+            case NSDownArrowFunctionKey:
+                arrow[2] = "B".utf8.first!
+                arrow[5] = "B".utf8.first!
+            case NSRightArrowFunctionKey:
+                arrow[2] = "C".utf8.first!
+                arrow[5] = "C".utf8.first!
+            case NSLeftArrowFunctionKey:
+                arrow[2] = "D".utf8.first!
+                arrow[5] = "D".utf8.first!
+            default:
+                isArrowKey = false
+                break
+            }
+           
+            if markedText != nil && isArrowKey {
+                ds.updateDoubleByteStateForRow(row: ds.cursorRow)
+                if Int(c) == NSRightArrowFunctionKey && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn).doubleByte == 1
+                || Int(c) == NSLeftArrowFunctionKey && ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2 {
+                    if frontMostConnection?.site.shouldDetectDoubleByte ?? false {
+                        frontMostConnection!.sendMessage(msg: Data(arrow))
+                        return
+                    }
+                }
+            }
+            if markedText != nil && Int(c) == NSDeleteCharacter {
+                if (frontMostConnection?.site.shouldDetectDoubleByte ?? false &&
+                    ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2) {
+                    frontMostConnection?.sendMessage(msg: Data([UInt8(NSDeleteCharacter), UInt8(NSDeleteCharacter)]))
+                } else {
+                    frontMostConnection?.sendMessage(msg: Data([UInt8(NSDeleteCharacter)]))
+                }
+                return;
+            }
+        }
+        interpretKeyEvents([event])
+    }
+    override func flagsChanged(with event: NSEvent) {
+        let currentFlags = event.modifierFlags
+        if currentFlags.contains(.option) {
+            // TODO:
+//            wantsRectangleSelection = true
+            NSCursor.crosshair().push()
+//            _mouseBehaviorDelegate.normalCursor = [NSCursor crosshairCursor];
+
+        } else {
+            // TODO:
+//            wantsRectangleSelection = false
+            NSCursor.crosshair().pop()
+//            _mouseBehaviorDelegate.normalCursor = [NSCursor crosshairCursor];
+        }
+        // ???
+        // super.flagsChanged(with:event)
+    }
+}
+
+extension TermView {
+    // MARK: Accessor
+    func selectedPlainString() -> String? {
+        // TODO:
+        if selectionLength == 0 {
+            return nil
+        }
+        if hasRectangleSelected {
+            if selectionLength >= 0 {
+                // TODO:
+                return nil
+            }
+            return nil
+        } else {
+            // TODO:
+            return nil
+        }
+    }
+    var shouldEnableMouse : Bool  {
+        get{
+            return frontMostConnection?.site.shouldEnableMouse ?? false
+        }
+    }
+//    var shouldWarnCompose : Bool {
+//        get {
+//            return frontMostTerminal?.bbsState.
+//        }
+//    }
 }

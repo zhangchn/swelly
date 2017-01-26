@@ -135,3 +135,20 @@ func isHiddenAttribute(_ a: Cell.Attribute) -> Bool {
 func isBlinkCell(_ c: Cell) -> Bool {
     return c.attribute.blink && (c.attribute.doubleByte != 0 || (c.byte != 0x20 && c.byte != 0x0))
 }
+
+let termKeyUp = Data([0x1b, "[".utf8.first!, "A".utf8.first!])
+let termKeyDown = Data([0x1b, "[".utf8.first!, "B".utf8.first!])
+let termKeyRight = Data([0x1b, "[".utf8.first!, "C".utf8.first!])
+let termKeyLeft = Data([0x1b, "[".utf8.first!, "D".utf8.first!])
+let termKeyEnter = Data([0x0d])
+let termKeyHome = Data([0x1b, "[".utf8.first!, 0x31, "~".utf8.first!])
+let termKeyEnd = Data([0x1b, "[".utf8.first!, 0x34, "~".utf8.first!])
+let termKeyPageUp = Data([0x1b, "[".utf8.first!, 0x35, "~".utf8.first!])
+let termKeyPageDown = Data([0x1b, "[".utf8.first!, 0x35, "~".utf8.first!])
+
+let WLTabCharacter : UInt16 = "\t".utf16.first!
+let WLEscapeCharacter : UInt16 = 0x1b
+let WLReturnCharacter : UInt16 = 0x0d
+let WLNewlineCharacter : UInt16 = 0x0a
+let WLWhitespaceCharacter : UInt16 = 0x20
+let WLNullTerminator : UInt16 = 0

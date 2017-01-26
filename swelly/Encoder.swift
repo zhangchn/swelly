@@ -33,3 +33,11 @@ func encodeToUnicode(_ char: UInt16, from encoding: Encoding) -> UTF16Char {
     let s = String(data: d, encoding: encoding.stringEncoding())!
     return s.utf16.first!.littleEndian
 }
+
+func encodeFromUnicode(_ char: UInt16, to encoding: Encoding) -> UTF16Char {
+    var char = char
+    let d = String(utf16CodeUnits: &char, count: 1).data(using: encoding.stringEncoding())
+    return d!.withUnsafeBytes({ (buff:UnsafePointer<UTF16Char>) -> UTF16Char in
+        return buff[0]
+    })
+}

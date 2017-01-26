@@ -67,8 +67,8 @@ class GlobalConfig {
      
         cellWidth = CGFloat(defaults.float(forKey: "CellWidth"))
         cellHeight = CGFloat(defaults.float(forKey: "CellHeight"))
-        chineseFontName = defaults.string(forKey: "ChineseFontName")!
-        englishFontName = defaults.string(forKey: "EnglishFontName")!
+        chineseFontName = defaults.string(forKey: "ChineseFontName") ?? "STHeiti"
+        englishFontName = defaults.string(forKey: "EnglishFontName") ?? "Monaco"
         chineseFontSize = CGFloat(defaults.float(forKey: "ChineseFontSize"))
         englishFontSize = CGFloat(defaults.float(forKey: "EnglishFontSize"))
         chineseFontPaddingLeft = CGFloat(defaults.float(forKey:"ChinesePaddingLeft"))
