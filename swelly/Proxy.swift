@@ -9,7 +9,7 @@
 import Foundation
 
 class Proxy {
-    class func proxyCommand(address proxyAddress:String,  type proxyType: ProxyType) -> String? {
+class func proxyCommand(address proxyAddress:String,  type proxyType: ProxyType) -> String? {
         return nil
     }
 }
