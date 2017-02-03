@@ -223,11 +223,11 @@ class TermView: NSView, NSTextInput {
         var buffer = [(Bool, Bool, unichar, Int)]()
         var textBytes = Data()
         var positions = [CGPoint]()
-        for x in start..<maxRow {
-            if !ds.isDirty(atRow: row, column: x) {
-                continue
-            }
-            ds.withCells(ofRow: row) { (cells) in
+        ds.withCells(ofRow: row) { (cells) in
+            for x in start..<maxColumn {
+                if !ds.isDirty(atRow: row, column: x) {
+                    continue
+                }
                 switch cells[x].attribute.doubleByte {
                 case 0:
                     let isDouble = false
@@ -266,29 +266,38 @@ class TermView: NSView, NSTextInput {
                 }
             }
         }
+        // sentinel
+        buffer.append((false, false, unichar(0), -1))
         
         let mutableAttributedString = NSMutableAttributedString(string: String(data: textBytes, encoding: frontMostConnection!.site.encoding.stringEncoding())!)
         // split by attribute
         ds.withCells(ofRow: row) { (cells) in
-            for var c in 0..<(buffer.count) {
+            var c = 0
+            while c < buffer.count {
                 let loc = c
                 let db = buffer[c].0
-                let lastAttr = cells[buffer[c].3].attribute
+                var index = buffer[c].3
+                
+                let lastAttr = cells[index].attribute
                 while c < buffer.count {
-                    if cells[buffer[c].3].attribute != lastAttr || buffer[c].0 != db {
+                    index = buffer[c].3
+                    if index < 0 || cells[index].attribute != lastAttr || buffer[c].0 != db {
                         break
                     }
                     c += 1
                 }
+                
+
                 let length = c - loc
                 let i = fgBoldOfAttribute(lastAttr) ? 1: 0
                 let j = Int(fgColorIndexOfAttribute(lastAttr))
                 let range = NSMakeRange(loc, length)
                 if db {
-                    mutableAttributedString.addAttributes(config.cCTAttribute![i][j], range: range)
+                    mutableAttributedString.addAttributes(config.cCTAttribute[i][j], range: range)
                 } else {
-                    mutableAttributedString.addAttributes(config.cCTAttribute![i][j], range: range)
+                    mutableAttributedString.addAttributes(config.eCTAttribute[i][j], range: range)
                 }
+                c += 1
             }
             
             let line = CTLineCreateWithAttributedString(mutableAttributedString as CFMutableAttributedString)
@@ -298,15 +307,16 @@ class TermView: NSView, NSTextInput {
                 return
             }
             
-            let runArray = CTLineGetGlyphRuns(line)
-            let runCount = CFArrayGetCount(runArray)
+            let runArray = CTLineGetGlyphRuns(line) as! [CTRun]
+            
+            let runCount = runArray.count
             var glyphOffset = 0
             let showsHidden = config.showHiddenText
             
             if let context = context {
                 
                 for runIndex in 0 ..< runCount {
-                    let run = CFArrayGetValueAtIndex(runArray, runIndex) as! CTRun
+                    let run = runArray[runIndex]
                     let runGlyphCount = CTRunGetGlyphCount(run)
                     // index of glyph in current run
                     //var runGlyphIndex = 0
@@ -327,20 +337,28 @@ class TermView: NSView, NSTextInput {
                     var lastDoubleByte = buffer[glyphOffset].0
                     
                     for runGlyphIndex in 0...runGlyphCount {
+                        
                         let index = buffer[glyphOffset + runGlyphIndex].3
+                        guard index >= 0 else {
+                            break
+                        }
                         let isHidden = isHiddenAttribute(cells[index].attribute)
-                        if runGlyphIndex == runGlyphCount || ((showsHidden && isHidden) != hidden) || (buffer[runGlyphIndex + glyphOffset].0 && index != lastIndex + 2) || (!buffer[runGlyphIndex + glyphOffset].0 && index != lastIndex + 1) || (buffer[runGlyphIndex + glyphOffset].0 != lastDoubleByte) {
+                        if runGlyphIndex == runGlyphCount
+                            || ((showsHidden && isHidden) != hidden)
+                            || (buffer[runGlyphIndex + glyphOffset].0 && index != lastIndex + 2)
+                            || (!buffer[runGlyphIndex + glyphOffset].0 && index != lastIndex + 1)
+                            || (buffer[runGlyphIndex + glyphOffset].0 != lastDoubleByte) {
                             lastDoubleByte = buffer[runGlyphIndex + glyphOffset].0
                             
                             let len = runGlyphIndex - location
                             let drawingMode : CGTextDrawingMode = showsHidden && hidden ? .stroke : .fill;
                             
                             context.setTextDrawingMode(drawingMode)
-                            var glyph = [CGGlyph](repeating: CGGlyph(0), count:len) // UnsafeMutablePointer<CGGlyph>.allocate(capacity: len)
+                            var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len) // UnsafeMutablePointer<CGGlyph>.allocate(capacity: len)
                             let glyphRange = CFRangeMake(location, len)
-                            CTRunGetGlyphs(run, glyphRange, &glyph)
+                            CTRunGetGlyphs(run, glyphRange, &glyphs)
 //                            positions.suffix(from: glyphOffset + location).
-                            context.showGlyphs(glyph, at: Array(positions.suffix(glyphOffset + location)))
+                            context.showGlyphs(glyphs, at: Array(positions[(glyphOffset + location)..<(glyphOffset + runGlyphIndex)]))
                             location = runGlyphIndex
                             if runGlyphIndex != runGlyphCount {
                                 hidden = isHiddenAttribute(cells[index].attribute)
@@ -414,7 +432,7 @@ class TermView: NSView, NSTextInput {
     func refreshHiddenRegion () {
         
     }
-    private func tick() {
+    fileprivate func tick() {
         updateBackedImage()
         if let ds = frontMostTerminal {
             if x != ds.cursorColumn || y != ds.cursorRow {
@@ -559,26 +577,26 @@ extension TermView {
         clearSelection()
         frontMostConnection?.send(text: text)
     }
-    func setMarked(string: String, selected: NSRange) {
-        guard !string.isEmpty else { unmarkText(); return; }
-        if let ds = frontMostTerminal {
-            markedText = string as AnyObject?
-            // TODO:
-            
-        }
-    }
-    func setMarked(text: AnyObject, selected range:NSRange) {
-        if let attrString = text as? NSAttributedString {
-            return setMarked(string: attrString.string, selected: range)
-        } else if let string = text as? String {
-            return setMarked(string: string, selected: range)
-        }
-    }
-    func unmarkText() {
-        // TODO:
-        markedText = nil
-        textField.isHidden = true
-    }
+//    func setMarked(string: String, selected: NSRange) {
+//        guard !string.isEmpty else { unmarkText(); return; }
+//        if let ds = frontMostTerminal {
+//            markedText = string as AnyObject?
+//            // TODO:
+//            
+//        }
+//    }
+//    func setMarked(text: AnyObject, selected range:NSRange) {
+//        if let attrString = text as? NSAttributedString {
+//            return setMarked(string: attrString.string, selected: range)
+//        } else if let string = text as? String {
+//            return setMarked(string: string, selected: range)
+//        }
+//    }
+//    func unmarkText() {
+//        // TODO:
+//        markedText = nil
+//        textField.isHidden = true
+//    }
     var conversationIdentifier: Int {
         get { return self.hash }
     }
@@ -802,4 +820,12 @@ extension TermView {
 //            return frontMostTerminal?.bbsState.
 //        }
 //    }
+}
+
+extension TermView: TerminalDelegate {
+    func didUpdate(in terminal: Terminal) {
+        if let t = frontMostTerminal , terminal === t {
+            tick()
+        }
+    }
 }
