@@ -14,19 +14,12 @@ class Site {
     var isDummy: Bool { get { return address.characters.count == 0 }}
     var name = NSLocalizedString(WLDefaultSiteName, comment: "Site")
     var address = ""
-    var encoding : Encoding
-    var ansiColorKey: ANSIColorKey
+    var encoding = GlobalConfig.sharedInstance.defaultEncoding
+    var ansiColorKey: ANSIColorKey = GlobalConfig.sharedInstance.defaultANSIColorKey
     var shouldAutoReply: Bool = false
-    var shouldDetectDoubleByte: Bool
-    var shouldEnableMouse: Bool
+    var shouldDetectDoubleByte = GlobalConfig.sharedInstance.shouldDetectDoubleByte
+    var shouldEnableMouse = GlobalConfig.sharedInstance.shouldEnableMouse
     var autoReplyString = NSLocalizedString(WLDefaultAutoReplyString, comment: "Site")
     var proxyAddress = ""
-    var proxyType: ProxyType = .None
-    init() {
-        encoding = GlobalConfig.sharedInstance.defaultEncoding
-        ansiColorKey = GlobalConfig.sharedInstance.defaultANSIColorKey
-        shouldEnableMouse = GlobalConfig.sharedInstance.shouldEnableMouse
-        shouldDetectDoubleByte = GlobalConfig.sharedInstance.shouldDetectDoubleByte
-    }
-    
+    var proxyType: ProxyType = .None    
 }

@@ -88,7 +88,7 @@ class Connection : PTYDelegate {
     func login() {
         let addr = site.address
         let account = addr.utf8
-        if addr.hasPrefix("ssh") {
+        if !addr.hasPrefix("ssh") {
             if let ps = account.split(separator: "@".utf8.first!).last?
                 .split(separator: " ".utf8.first!).last?
                 .split(separator: " ".utf8.first!).last {
@@ -99,7 +99,7 @@ class Connection : PTYDelegate {
                 }
             }
             
-        } else if terminalFeeder.grid[terminalFeeder.cursorY][terminalFeeder.cursorX - 2].byte == "?".utf8.first! {
+        } else if terminalFeeder.cursorX > 2, terminalFeeder.grid[terminalFeeder.cursorY][terminalFeeder.cursorX - 2].byte == "?".utf8.first! {
             sendMessage(msg: "yes\r".data(using: .ascii)!)
             sleep(1)
         }
@@ -177,5 +177,9 @@ class Connection : PTYDelegate {
         messageCount = 0
         //TODO:
         //self.objectCount = 0
+    }
+    
+    func didReceive(newMessage: String, from caller: String) {
+        //
     }
 }

@@ -902,6 +902,47 @@ class TerminalFeeder {
         terminal?.feed(grid: &grid)
         if hasNewMessage {
             // TODO: new incoming message
+            if let terminal = terminal {
+                switch terminal.bbsType {
+                case .Maple:
+                    guard grid[row - 1][0].attribute.bgColor != 9
+                        && grid[row - 1][column - 2].attribute.bgColor == 9 else {
+                            break
+                    }
+                    // PTT
+                case .Firebird:
+                    guard grid[0][0].attribute.bgColor != 9 else {
+                        break
+                    }
+                    // NewSMTH
+                    var stop: Int!
+                    for i in 2..<row {
+                        stop = i
+                        if grid[i][0].attribute.bgColor == 9 {
+                            break
+                        }
+                    }
+                    let caller = terminal.string(fromIndex: 0, toIndex: column)
+                    let message = terminal.string(fromIndex: column, toIndex: stop * column )
+                    print("caller: \(caller); message: \(message)")
+                default:
+                    break
+                }
+            }
+//            if terminal?.bbsType == .Maple ?? false
+//                && grid[row - 1][0].attribute.bgColor != 9
+//                && grid[row - 1][column - 2].attribute.bgColor == 9 {
+//                    
+////                .f.bgColor != 9 && grid[row - 1][column - 2].attr.f.bgColor == 9) {
+//            } else if (terminal?.bbsType == WLFirebird && _grid[0][0].attr.f.bgColor != 9) {
+//                // for firebird bbs (e.g. smth)
+//                for (i = 2; i < _row && _grid[i][0].attr.f.bgColor != 9; ++i);	// determine the end of the message
+//                NSString *callerName = [_terminal stringAtIndex:0 length:_column];
+//                NSString *messageString = [_terminal stringAtIndex:_column length:(i - 1) * _column];
+//                
+//                [connection didReceiveNewMessage:messageString fromCaller:callerName];
+//            }
+
         }
     }
     func  CURSOR_MOVETO(x: Int, y: Int) {

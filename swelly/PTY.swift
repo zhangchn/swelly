@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Darwin.POSIX.unistd
+import Darwin
 
 protocol PTYDelegate {
     func ptyWillConnect(_ pty: PTY)
@@ -109,7 +109,8 @@ class PTY {
         var fmt: String!
         if addr.lowercased().hasPrefix("ssh://") {
             ssh = true
-            addr = String(addr.characters.suffix(6))
+            addr = String(addr.utf8.suffix(addr.characters.count - 6))!
+            
         } else {
             if let range = addr.range(of: "://") {
                 addr = addr.substring(from: range.upperBound)
@@ -142,12 +143,21 @@ class PTY {
         let cflag = tcflag_t(bitPattern: Int(CREAD | CS8 | HUPCL))
         let lflag = tcflag_t(bitPattern: Int(ICANON | ISIG | IEXTEN | ECHO | ECHOE | ECHOK | ECHOKE | ECHOCTL))
         
-        var term = try! termios(c_iflag: iflag, c_oflag: oflag, c_cflag: cflag, c_lflag: lflag, c_cc: (ctrlKey("D"), 0xff, 0xff, 0x7f, ctrlKey("W"), ctrlKey("U"), ctrlKey("R"), ctrlKey("C"), 0x1c, ctrlKey("Z"), ctrlKey("Y"), ctrlKey("Q"), ctrlKey("S"), 0xff, 0xff, 1, 0, 0xff, 0, 0), c_ispeed: speed_t(B38400), c_ospeed: speed_t(B38400))
+        let controlCharacters : (cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t, cc_t) = try! (ctrlKey("D"), 0xff, 0xff, 0x7f, ctrlKey("W"), ctrlKey("U"), ctrlKey("R"), 0, ctrlKey("C"), 0x1c, ctrlKey("Z"), ctrlKey("Y"), ctrlKey("Q"), ctrlKey("S"), 0xff, 0xff, 1, 0, 0xff, 0)
+        var term = termios(c_iflag: iflag,
+                           c_oflag: oflag,
+                           c_cflag: cflag,
+                           c_lflag: lflag,
+                           c_cc: controlCharacters,
+                           c_ispeed: speed_t(B38400),
+                           c_ospeed: speed_t(B38400))
         let ws_col = GlobalConfig.sharedInstance.column
         let ws_row = GlobalConfig.sharedInstance.row
         var size = winsize(ws_row: UInt16(ws_row), ws_col: UInt16(ws_col), ws_xpixel: 0, ws_ypixel: 0)
         pid = forkpty(&fd, slaveName, &term, &size)
         if pid == 0 {
+            // child process
+            //kill(0, SIGSTOP)
             var a = PTY.parse(addr: addr).components(separatedBy: " ")
             if let b = a.first {
                 if b.hasSuffix("ssh") {
@@ -157,14 +167,19 @@ class PTY {
                     }
                 }
             }
-            var argv: [UnsafeMutablePointer<CChar>?] = a.map {
-                var s = $0.utf8CString;
-                return s.withUnsafeMutableBufferPointer { $0.baseAddress} }
-            argv.append(nil)
-            argv.withUnsafeMutableBufferPointer {
-                execvp($0.first!, $0.baseAddress!)
-                perror($0.first!)
+            let argv = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: a.count + 1)
+            for (idx, arg) in a.enumerated() {
+                argv[idx] = arg.utf8CString.withUnsafeBytes({ (buf) -> UnsafeMutablePointer<Int8> in
+                    let x = UnsafeMutablePointer<Int8>.allocate(capacity: buf.count + 1)
+                    memcpy(x, buf.baseAddress, buf.count)
+                    x[buf.count] = 0
+                    return x
+                })
             }
+            argv[a.count] = nil
+            execvp(argv[0], argv)
+            perror(argv[0])
+            
             sleep(UINT32_MAX)
         } else {
             var one = 1
@@ -264,8 +279,9 @@ class PTY {
             } else if __darwin_fd_isset(fd, &readfds) != 0 {
                 result = Int32(read(fd, buf, 4096))
                 if result > 1 {
+                    let d =  Data(buffer: UnsafeBufferPointer<Int8>(start: buf.advanced(by: 1), count: result - 1))
                     DispatchQueue.main.async {
-                        self.recv(data: Data.init(buffer: UnsafeBufferPointer<Int8>(start: buf.advanced(by: 1), count: result - 1)))
+                        self.recv(data: d)
                     }
                 } else if result == 0 {
                     exit = true

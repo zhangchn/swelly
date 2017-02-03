@@ -8,6 +8,10 @@
 
 import Foundation
 
+protocol TerminalDelegate: NSObjectProtocol {
+    func didUpdate(in terminal: Terminal)
+}
+
 class Terminal {
     var offset: Int = 0
     var maxRow = GlobalConfig.sharedInstance.row
@@ -16,7 +20,7 @@ class Terminal {
     var cursorRow = 0
     var grid = [[Cell]]()
     var dirty = [[Bool]]()
-    
+    weak var delegate: TerminalDelegate?
     var encoding: Encoding! {
         get { return connection!.site.encoding }
         set { connection?.site.encoding = newValue }
@@ -181,14 +185,11 @@ class Terminal {
             updateDoubleByteStateForRow(row: i)
         }
         updateBBSState()
-        notifyObservers()
+        delegate?.didUpdate(in: self)
     }
     // TODO:
     func updateBBSState() {
         
     }
-    // TODO:
-    func notifyObservers() {
-        
-    }
+
 }
