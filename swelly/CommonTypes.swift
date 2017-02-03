@@ -73,7 +73,7 @@ struct Cell {
         }
         var doubleByte : UInt8 {
             get {
-                return UInt8(rawValue >> 2) & 0x03
+                return UInt8((rawValue >> 2) & 0x03)
             }
             set {
                 rawValue = (rawValue & 0xfff3) | ((UInt16(newValue) << 2) & 0x000c)
