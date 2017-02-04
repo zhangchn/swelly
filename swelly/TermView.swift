@@ -273,7 +273,7 @@ class TermView: NSView, NSTextInput {
         // split by attribute
         ds.withCells(ofRow: row) { (cells) in
             var c = 0
-            while c < buffer.count {
+            while c < buffer.count - 1 {
                 let loc = c
                 let db = buffer[c].0
                 var index = buffer[c].3
@@ -324,7 +324,7 @@ class TermView: NSView, NSTextInput {
                     let attrDict = CTRunGetAttributes(run) as Dictionary
                     let runFont = attrDict[kCTFontAttributeName] as! CTFont
                     let cgFont = CTFontCopyGraphicsFont(runFont, nil)
-                    let runColor = attrDict[kCTForegroundColorAttributeName] as! NSColor
+                    let runColor = (attrDict[kCTForegroundColorAttributeName] as? NSColor) ?? NSColor.red
                     
                     context.setFont(cgFont)
                     context.setFontSize(CTFontGetSize(runFont))

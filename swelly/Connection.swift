@@ -25,7 +25,12 @@ class Connection : PTYDelegate {
             }
         }
     }
-    var terminal: Terminal! {didSet{ terminal.connection = self}}
+    var terminal: Terminal! {
+        didSet {
+            terminal.connection = self
+            terminalFeeder.terminal = terminal
+        }
+    }
     var terminalFeeder: TerminalFeeder
     var pty: PTY?
     var site: Site

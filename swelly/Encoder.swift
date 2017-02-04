@@ -27,8 +27,9 @@ enum Encoding : Int {
 func encodeToUnicode(_ char: UInt16, from encoding: Encoding) -> UTF16Char {
    
     var d = Data.init(count: 2)
-    d.withUnsafeMutableBytes { (buffer: UnsafeMutablePointer<UInt16>) in
-        buffer[0] = char
+    d.withUnsafeMutableBytes { (buffer: UnsafeMutablePointer<UInt8>) in
+        buffer[0] = UInt8((char & 0x7f00) >> 8) | 0x80
+        buffer[1] = UInt8(char & 0x00ff)
     }
     let s = String(data: d, encoding: encoding.stringEncoding())!
     return s.utf16.first!.littleEndian

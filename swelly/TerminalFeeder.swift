@@ -211,10 +211,12 @@ class TerminalFeeder {
         let config = GlobalConfig.sharedInstance
         fgColor = config.fgColorIndex
         bgColor = config.bgColorIndex
+        
 
+        TerminalFeeder.gEmptyAttr = Cell.Attribute(rawValue: 0)!
         TerminalFeeder.gEmptyAttr.fgColor = UInt8(fgColor)
         TerminalFeeder.gEmptyAttr.bgColor = UInt8(bgColor)
-
+        
         csTemp = 0;
         state = .TP_NORMAL
         bold = false
@@ -239,8 +241,13 @@ class TerminalFeeder {
         terminal?.setAllDirty()
     }
     func feed(data: Data, connection: Connection) {
-        data.withUnsafeBytes {
-            feed(bytes: $0, length: data.count, connection: connection)
+        data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
+            var debugOutput = "feed:"
+            for idx in 0..<data.count {
+                debugOutput += "(\(bytes[idx])) "
+            }
+            debugPrint(debugOutput)
+            feed(bytes: bytes, length: data.count, connection: connection)
         }
     }
     
@@ -891,8 +898,8 @@ class TerminalFeeder {
                 }
                 
                 
-                csArg = []
-                state = .TP_NORMAL
+//                csArg = []
+//                state = .TP_NORMAL
             case .TP_SCS:
                 state = .TP_NORMAL
             }

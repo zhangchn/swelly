@@ -36,7 +36,7 @@ struct Cell {
                 return UInt8(rawValue >> 8) & 0x0f
             }
             set {
-                rawValue = (rawValue & 0x0f00) | ((UInt16(newValue) << 8) & 0x0f00)
+                rawValue = (rawValue & 0xf0ff) | ((UInt16(newValue) << 8) & 0x0f00)
             }
         }
         var bold : Bool {
