@@ -78,7 +78,7 @@ class TermView: NSView, NSTextInput {
     }
     
     func updateBackedImage() {
-        backedImage?.lockFocus()
+        backedImage.lockFocus()
         let context = NSGraphicsContext.current()?.cgContext
         if let ds = frontMostTerminal {
             for y in 0 ..< maxRow {
@@ -105,17 +105,15 @@ class TermView: NSView, NSTextInput {
             NSColor.clear.set()
             context?.fill(CGRect(x: 0, y: 0, width: CGFloat(maxColumn) * fontWidth, height: CGFloat(maxRow) * fontHeight))
         }
-        backedImage?.unlockFocus()
+        backedImage.unlockFocus()
     }
     
-    var backedImage: NSImage?
+    lazy var backedImage = NSImage(size: GlobalConfig.sharedInstance.contentSize)
+
     static var gLeftImage: NSImage!
     func configure() {
         let gConfig = GlobalConfig.sharedInstance
         self.setFrameSize(gConfig.contentSize)
-        if let _ = backedImage {} else {
-            backedImage = NSImage(size: gConfig.contentSize)
-        }
         TermView.gLeftImage = NSImage(size: NSSize(width: fontWidth, height: fontHeight))
         singleAdvance = [CGSize](repeating: CGSize(width: fontWidth, height: 0), count: maxColumn)
         doubleAdvance = [CGSize](repeating: CGSize(width: fontWidth * 2.0, height: 0), count: maxColumn)
@@ -402,22 +400,22 @@ class TermView: NSView, NSTextInput {
                             config.bgColor(atIndex: Int(bgColor), highlight: bgBoldOfAttribute(cells[index].attribute)).set()
                             let rect = NSRect(origin: NSZeroPoint, size: TermView.gLeftImage.size)
                             NSRectFill(rect)
-                            //let tempContext = NSGraphicsContext.current()!.graphicsPort as! CGContext
-                            context.saveGState()
-                            context.setShouldSmoothFonts(config.shouldSmoothFonts)
-                            let tempColor = config.color(atIndex: Int(fgColor), highlight: fgBoldOfAttribute(cells[index].attribute))
-                            context.setFont(cgFont)
-                            context.setFontSize(CTFontGetSize(runFont))
-                            context.setFillColor(red: tempColor.redComponent, green: tempColor.greenComponent, blue: tempColor.blueComponent, alpha: 1.0)
-                            let glyphPosition = CGPoint(x: cPaddingLeft, y: CTFontGetDescent(cCTFont!) + cPaddingBottom)
-                            context.showGlyphs([glyph], at: [glyphPosition])
-                            TermView.gLeftImage.unlockFocus()
-                            TermView.gLeftImage.draw(at: NSPoint(x:CGFloat(index) * fontWidth,
-                                                                 y: CGFloat(maxRow - 1 - row) * fontHeight),
-                                                     from: rect,
-                                                     operation: .copy,
-                                                     fraction: 1.0);
-                            context.restoreGState()
+                            if let tempContext = NSGraphicsContext.current()?.cgContext {
+                                tempContext.setShouldSmoothFonts(config.shouldSmoothFonts)
+                                let tempColor = config.color(atIndex: Int(fgColor), highlight: fgBoldOfAttribute(cells[index].attribute))
+                                tempContext.setFont(cgFont)
+                                tempContext.setFontSize(CTFontGetSize(runFont))
+                                tempContext.setFillColor(red: tempColor.redComponent, green: tempColor.greenComponent, blue: tempColor.blueComponent, alpha: 1.0)
+                                let glyphPosition = CGPoint(x: cPaddingLeft, y: CTFontGetDescent(cCTFont!) + cPaddingBottom)
+                                tempContext.showGlyphs([glyph], at: [glyphPosition])
+                                TermView.gLeftImage.unlockFocus()
+                                TermView.gLeftImage.draw(at: NSPoint(x:CGFloat(index) * fontWidth,
+                                                                     y: CGFloat(maxRow - 1 - row) * fontHeight),
+                                                         from: rect,
+                                                         operation: .copy,
+                                                         fraction: 1.0);
+                            
+                            }
                         }
                     }
                     glyphOffset += runGlyphCount
@@ -477,7 +475,7 @@ class TermView: NSView, NSTextInput {
             // Draw the backed image
             var imgRect = dirtyRect
             imgRect.origin.y = fontHeight * CGFloat(maxRow) - dirtyRect.origin.y - dirtyRect.size.height
-            backedImage?.draw(at: dirtyRect.origin, from: dirtyRect, operation: .copy, fraction: 1.0)
+            backedImage.draw(at: dirtyRect.origin, from: dirtyRect, operation: .copy, fraction: 1.0)
             // TODO:
             drawBlink()
             // Draw the url underline
