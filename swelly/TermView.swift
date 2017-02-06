@@ -136,10 +136,7 @@ class TermView: NSView, NSTextInput {
     }
     
     private func updateBackground(row: Int, from start: Int, to end: Int) {
-//        int c;
-//        cell *currRow = [[self frontMostTerminal] cellsOfRow:r];
         guard let ds = frontMostTerminal else {return }
-        Swift.print("row: \(row)")
         ds.withCells(ofRow: row) { cells in
             let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
             var lastAttr = cells[start].attribute
@@ -156,7 +153,6 @@ class TermView: NSView, NSTextInput {
                     currentBold = bgBoldOfAttribute(currAttr)
                 }
                 if (currentBackgroundColor != lastBackgroundColor || currentBold != lastBold || c == end) {
-                    Swift.print("lastBg: \(c - length), \(length): \(lastBackgroundColor)")
                     let rect = NSMakeRect(CGFloat(c - length) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, fontWidth * CGFloat(length), fontHeight)
                     // Modified by K.O.ed: All background color use same alpha setting.
                     let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
@@ -290,7 +286,6 @@ class TermView: NSView, NSTextInput {
         let string = String(data: textBytes, encoding: encoding)!
         let mutableAttributedString = NSMutableAttributedString(string: string)
         // split by attribute
-        debugPrint("row: \(row)")
         ds.withCells(ofRow: row) { (cells) in
             var c = 0
             while c < buffer.count - 1 {
@@ -312,15 +307,12 @@ class TermView: NSView, NSTextInput {
                 let i = fgBoldOfAttribute(lastAttr) ? 1: 0
                 let j = Int(fgColorIndexOfAttribute(lastAttr))
                 let range = NSMakeRange(loc, length)
-                debugPrint("range:\(loc), \(length) : \(i) \(j)")
                 if db {
                     mutableAttributedString.addAttributes(config.cCTAttribute[i][j], range: range)
                 } else {
                     mutableAttributedString.addAttributes(config.eCTAttribute[i][j], range: range)
                 }
-                c += 1
             }
-            
             let line = CTLineCreateWithAttributedString(mutableAttributedString as CFMutableAttributedString)
             let glyphCount = CTLineGetGlyphCount(line)
             

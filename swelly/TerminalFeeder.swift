@@ -797,10 +797,10 @@ class TerminalFeeder {
                                         modeOriginRelative = false
                                     } else if (p == 7) { // Reset auto-wrap mode (disable)
                                         modeWraptext = false
-                                        //							    } else if (p == 1) { // Set cursor key to cursor
-                                        //								} else if (p == 4) { // Set jump scrolling
-                                        //								} else if (p == 8) { // Reset auto-repeat mode
-                                        //								} else if (p == 9) { // Reset interlacing mode
+    //							    } else if (p == 1) { // Set cursor key to cursor
+    //								} else if (p == 4) { // Set jump scrolling
+    //								} else if (p == 8) { // Reset auto-repeat mode
+    //								} else if (p == 9) { // Reset interlacing mode
                                     }
                                 }
                             } else if (p == 20) { // set line feed mode
@@ -828,7 +828,7 @@ class TerminalFeeder {
                             bold = false
                             underline = false
                             blink = false
-                            reverse = !modeScreenReverse
+                            reverse = modeScreenReverse
                         } else {
                             while !csArg.isEmpty {
                                 let p = csArg.removeFirst()
@@ -839,7 +839,7 @@ class TerminalFeeder {
                                     bold = false
                                     underline = false
                                     blink = false
-                                    reverse = !modeScreenReverse
+                                    reverse = modeScreenReverse
                                 case 30...39:
                                     fgColor = p - 30
                                 case 40...49:
@@ -851,7 +851,7 @@ class TerminalFeeder {
                                 case 5:
                                     blink = true
                                 case 7:
-                                    reverse = modeScreenReverse
+                                    reverse = !modeScreenReverse
                                 default:
                                     break
                                 }
