@@ -111,7 +111,7 @@ class GlobalConfig {
         let ename = englishFontName as CFString
         let cname = chineseFontName as CFString
         englishFont = CTFontCreateWithName(ename, englishFontSize, nil)
-        chineseFont = CTFontCreateWithName(cname, englishFontSize, nil)
+        chineseFont = CTFontCreateWithName(cname, chineseFontSize, nil)
         
         for table in 0..<2 {
             cCTAttribute.append([])

@@ -82,7 +82,8 @@ class TermView: NSView, NSTextInput {
         let context = NSGraphicsContext.current()?.cgContext
         if let ds = frontMostTerminal {
             for y in 0 ..< maxRow {
-                for var x in 0..<maxColumn {
+                var x = 0
+                while x < maxColumn {
                     if ds.isDirty(atRow: y, column: x) {
                         let start = x
                         while x < maxColumn && ds.isDirty(atRow: y, column: x) {
@@ -90,6 +91,7 @@ class TermView: NSView, NSTextInput {
                         }
                         updateBackground(row: y, from: start, to: x)
                     }
+                    x += 1
                 }
             }
             context?.saveGState()
@@ -139,6 +141,7 @@ class TermView: NSView, NSTextInput {
 //        int c;
 //        cell *currRow = [[self frontMostTerminal] cellsOfRow:r];
         guard let ds = frontMostTerminal else {return }
+        Swift.print("row: \(row)")
         ds.withCells(ofRow: row) { cells in
             let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
             var lastAttr = cells[start].attribute
@@ -155,6 +158,7 @@ class TermView: NSView, NSTextInput {
                     currentBold = bgBoldOfAttribute(currAttr)
                 }
                 if (currentBackgroundColor != lastBackgroundColor || currentBold != lastBold || c == end) {
+                    Swift.print("lastBg: \(c - length), \(length): \(lastBackgroundColor)")
                     let rect = NSMakeRect(CGFloat(c - length) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, fontWidth * CGFloat(length), fontHeight)
                     // Modified by K.O.ed: All background color use same alpha setting.
                     let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
@@ -219,6 +223,7 @@ class TermView: NSView, NSTextInput {
         let cPaddingBottom = config.chineseFontPaddingBottom
         let cPaddingLeft = config.chineseFontPaddingLeft
         let cCTFont = config.chineseFont
+        let siteEncoding = frontMostConnection!.site.encoding
         let end = start
         var buffer = [(Bool, Bool, unichar, Int)]()
         var textBytes = Data()
@@ -258,8 +263,23 @@ class TermView: NSView, NSTextInput {
                     if x == start {
                         setNeedsDisplay(NSRect(x: CGFloat(x - 1) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight, width: fontWidth, height: fontHeight))
                     }
-                    textBytes.append(cells[x-1].byte)
-                    textBytes.append(cells[x].byte)
+                    if siteEncoding == .gbk {
+                        if cells[x-1].byte < 0x81 ||
+                            cells[x-1].byte > 0xfe ||
+                            cells[x].byte < 0x40 ||
+                            cells[x].byte > 0xfe {
+                            let placeholder = [UInt8(0x86), UInt8(0x40)]
+                            textBytes.append(placeholder[0])
+                            textBytes.append(placeholder[1])
+                        } else {
+                            textBytes.append(cells[x-1].byte)
+                            textBytes.append(cells[x].byte)
+                        }
+                    } else {
+                        textBytes.append(cells[x-1].byte)
+                        textBytes.append(cells[x].byte)
+                    }
+                    
                 default:
                     NSLog("invalid doubleByte")
                     break
@@ -268,9 +288,11 @@ class TermView: NSView, NSTextInput {
         }
         // sentinel
         buffer.append((false, false, unichar(0), -1))
-        
-        let mutableAttributedString = NSMutableAttributedString(string: String(data: textBytes, encoding: frontMostConnection!.site.encoding.stringEncoding())!)
+        let encoding = siteEncoding.stringEncoding()
+        let string = String(data: textBytes, encoding: encoding)!
+        let mutableAttributedString = NSMutableAttributedString(string: string)
         // split by attribute
+        debugPrint("row: \(row)")
         ds.withCells(ofRow: row) { (cells) in
             var c = 0
             while c < buffer.count - 1 {
@@ -292,6 +314,7 @@ class TermView: NSView, NSTextInput {
                 let i = fgBoldOfAttribute(lastAttr) ? 1: 0
                 let j = Int(fgColorIndexOfAttribute(lastAttr))
                 let range = NSMakeRange(loc, length)
+                debugPrint("range:\(loc), \(length) : \(i) \(j)")
                 if db {
                     mutableAttributedString.addAttributes(config.cCTAttribute[i][j], range: range)
                 } else {
@@ -379,20 +402,22 @@ class TermView: NSView, NSTextInput {
                             config.bgColor(atIndex: Int(bgColor), highlight: bgBoldOfAttribute(cells[index].attribute)).set()
                             let rect = NSRect(origin: NSZeroPoint, size: TermView.gLeftImage.size)
                             NSRectFill(rect)
-                            let tempContext = NSGraphicsContext.current()?.graphicsPort as! CGContext
-                            tempContext.setShouldSmoothFonts(config.shouldSmoothFonts)
+                            //let tempContext = NSGraphicsContext.current()!.graphicsPort as! CGContext
+                            context.saveGState()
+                            context.setShouldSmoothFonts(config.shouldSmoothFonts)
                             let tempColor = config.color(atIndex: Int(fgColor), highlight: fgBoldOfAttribute(cells[index].attribute))
-                            tempContext.setFont(cgFont)
-                            tempContext.setFontSize(CTFontGetSize(runFont))
-                            tempContext.setFillColor(red: tempColor.redComponent, green: tempColor.greenComponent, blue: tempColor.blueComponent, alpha: 1.0)
+                            context.setFont(cgFont)
+                            context.setFontSize(CTFontGetSize(runFont))
+                            context.setFillColor(red: tempColor.redComponent, green: tempColor.greenComponent, blue: tempColor.blueComponent, alpha: 1.0)
                             let glyphPosition = CGPoint(x: cPaddingLeft, y: CTFontGetDescent(cCTFont!) + cPaddingBottom)
-                            tempContext.showGlyphs([glyph], at: [glyphPosition])
+                            context.showGlyphs([glyph], at: [glyphPosition])
                             TermView.gLeftImage.unlockFocus()
                             TermView.gLeftImage.draw(at: NSPoint(x:CGFloat(index) * fontWidth,
                                                                  y: CGFloat(maxRow - 1 - row) * fontHeight),
                                                      from: rect,
                                                      operation: .copy,
                                                      fraction: 1.0);
+                            context.restoreGState()
                         }
                     }
                     glyphOffset += runGlyphCount
@@ -536,7 +561,7 @@ extension TermView {
         guard frontMostTerminal != nil && frontMostConnection!.connected else {
             return
         }
-        textField.isHidden = true
+        //textField.isHidden = true
         markedText = nil
         frontMostConnection?.send(text: text as! String, delay: microsecond)
     }
@@ -773,6 +798,14 @@ extension TermView {
         }
         interpretKeyEvents([event])
     }
+    
+//    override func moveDown(_ sender: Any?) {
+//        var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
+//        if let ds = frontMostTerminal {
+//            arrow[2] = "A".utf8.first!
+//            arrow[5] = "A".utf8.first!
+//        }
+//    }
     override func flagsChanged(with event: NSEvent) {
         let currentFlags = event.modifierFlags
         if currentFlags.contains(.option) {

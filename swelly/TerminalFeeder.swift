@@ -244,9 +244,25 @@ class TerminalFeeder {
         data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
             var debugOutput = "feed:"
             for idx in 0..<data.count {
-                debugOutput += "(\(bytes[idx])) "
+                switch bytes[idx] {
+                case 0:
+                    debugOutput += "NUL "
+                case 27:
+                    debugOutput += "ESC "
+                case 10:
+                    debugOutput += "\\n"
+                case 13:
+                    debugOutput += "\\r"
+                case 32..<127:
+                    let u = UnicodeScalar(bytes[idx])
+                    let c = Character(u)
+                    debugOutput += "'\(c)' "
+                default:
+                    debugOutput += "(\(bytes[idx])) "
+                }
+                //debugOutput += "(\(bytes[idx])) "
             }
-            debugPrint(debugOutput)
+            print(debugOutput)
             feed(bytes: bytes, length: data.count, connection: connection)
         }
     }
