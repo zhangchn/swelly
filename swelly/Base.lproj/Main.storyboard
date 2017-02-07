@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
@@ -663,12 +663,14 @@
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
             <objects>
-                <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                <windowController showSeguePresentationStyle="single" id="B8D-0N-5wS" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA" customClass="NSPanel">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="240" width="480" height="270"/>
+                        <rect key="contentRect" x="196" y="240" width="960" height="664"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <value key="minSize" type="size" width="960" height="664"/>
+                        <value key="maxSize" type="size" width="960" height="664"/>
                     </window>
                     <connections>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
@@ -682,17 +684,61 @@
         <scene sceneID="hIz-AP-VOD">
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="swelly" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl" customClass="TermView" customModule="swelly" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                    <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
+                        <rect key="frame" x="0.0" y="0.0" width="960" height="644"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ewy-wU-WTV">
+                                <rect key="frame" x="280" y="593" width="400" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="400" id="WS2-YZ-VUX"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="ssh://{username}@bbs.newsmth.net" drawsBackground="YES" id="ITF-Kl-TUO">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <allowedInputSourceLocales>
+                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                    </allowedInputSourceLocales>
+                                </textFieldCell>
+                            </textField>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="d5b-Y4-iCj" customClass="TermView" customModule="swelly" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="960" height="576"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="960" id="G91-HF-WQ6"/>
+                                    <constraint firstAttribute="height" constant="576" id="bA5-aZ-1Rc"/>
+                                </constraints>
+                            </customView>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Npr-5x-a6d">
+                                <rect key="frame" x="836" y="589" width="110" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3z8-6Y-aUH">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="didPressConnect:" target="XfG-lQ-9wD" id="tA0-fH-WvQ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="d5b-Y4-iCj" firstAttribute="top" secondItem="ewy-wU-WTV" secondAttribute="bottom" constant="17" id="0FX-7o-O7Q"/>
+                            <constraint firstItem="ewy-wU-WTV" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="0xy-60-MZg"/>
+                            <constraint firstItem="d5b-Y4-iCj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Cgn-Mv-jBl"/>
+                            <constraint firstItem="ewy-wU-WTV" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="29" id="MgC-3Q-4cL"/>
+                            <constraint firstAttribute="trailing" secondItem="d5b-Y4-iCj" secondAttribute="trailing" id="VDs-Lj-NX7"/>
+                            <constraint firstAttribute="bottom" secondItem="d5b-Y4-iCj" secondAttribute="bottom" id="oHv-7t-MGS"/>
+                        </constraints>
                     </view>
                     <connections>
-                        <outlet property="termView" destination="m2S-Jp-Qdl" id="bVk-tt-dEC"/>
+                        <outlet property="connectButton" destination="Npr-5x-a6d" id="ixR-TO-iXv"/>
+                        <outlet property="siteAddressField" destination="ewy-wU-WTV" id="cuc-8M-uAC"/>
+                        <outlet property="termView" destination="d5b-Y4-iCj" id="UB2-h9-CjP"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="-178" y="931"/>
         </scene>
     </scenes>
 </document>

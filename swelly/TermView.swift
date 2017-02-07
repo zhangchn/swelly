@@ -521,9 +521,9 @@ class TermView: NSView, NSTextInput {
     override class func defaultMenu() -> NSMenu? {
         return NSMenu()
     }
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        return self
-    }
+//    override func hitTest(_ point: NSPoint) -> NSView? {
+//        return self
+//    }
     override func resetCursorRects() {
         super.resetCursorRects()
         // TODO: refreshMouseHotspot
