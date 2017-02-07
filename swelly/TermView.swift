@@ -171,6 +171,11 @@ class TermView: NSView, NSTextInput {
         }
         
     }
+    
+//    override func setNeedsDisplay(_ invalidRect: NSRect) {
+//        super.setNeedsDisplay(invalidRect)
+//        debugPrint("setNeedsDisplay:\(invalidRect)")
+//    }
     private func drawBlink() {
         let config = GlobalConfig.sharedInstance
         if !config.blinkTicker {
@@ -294,7 +299,7 @@ class TermView: NSView, NSTextInput {
                 var index = buffer[c].3
                 
                 let lastAttr = cells[index].attribute
-                while c < buffer.count {
+                while c < buffer.count - 1{
                     index = buffer[c].3
                     if index < 0 || cells[index].attribute != lastAttr || buffer[c].0 != db {
                         break
@@ -352,10 +357,7 @@ class TermView: NSView, NSTextInput {
                     for runGlyphIndex in 0...runGlyphCount {
                         
                         let index = buffer[glyphOffset + runGlyphIndex].3
-                        guard index >= 0 else {
-                            break
-                        }
-                        let isHidden = isHiddenAttribute(cells[index].attribute)
+                        let isHidden = index >= 0 ? isHiddenAttribute(cells[index].attribute) : false
                         if runGlyphIndex == runGlyphCount
                             || ((showsHidden && isHidden) != hidden)
                             || (buffer[runGlyphIndex + glyphOffset].0 && index != lastIndex + 2)
@@ -379,7 +381,7 @@ class TermView: NSView, NSTextInput {
                         }
                         lastIndex = index
                     }
-                    for runGlyphIndex in 0 ..< runGlyphCount {
+                    for runGlyphIndex in 0 ... runGlyphCount {
                         if buffer[glyphOffset + runGlyphIndex].1 {
                             let range = CFRangeMake(runGlyphIndex, 1)
                             var glyph = CGGlyph()
