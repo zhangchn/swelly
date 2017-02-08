@@ -8,7 +8,7 @@
 
 import AppKit
 
-class TermView: NSView, NSTextInput {
+class TermView: NSView {
     
     var fontWidth: CGFloat
     
@@ -540,20 +540,19 @@ class TermView: NSView, NSTextInput {
         }
     }
     
-    var textField: NSTextField!
-    var markedText: AnyObject?
+    @IBOutlet var textField: MarkedTextView!
+    var markedText: NSAttributedString?
+    var _selectedRange: NSRange = NSMakeRange(0, 0)
+    var _markedRange: NSRange = NSMakeRange(0, 0)
 }
 
-extension TermView {
-    // MARK: NSTextInput
-    override func insertText(_ insertString: Any) {
-        insert(text: insertString, delay: 0)
-    }
+extension TermView: NSTextInputClient {
+    // MARK: NSTextInputClient
     func insert(text: Any, delay microsecond: Int) {
         guard frontMostTerminal != nil && frontMostConnection!.connected else {
             return
         }
-        //textField.isHidden = true
+        textField.isHidden = true
         markedText = nil
         frontMostConnection?.send(text: text as! String, delay: microsecond)
     }
@@ -616,6 +615,99 @@ extension TermView {
 //    }
     var conversationIdentifier: Int {
         get { return self.hash }
+    }
+    func insertText(_ string: Any, replacementRange: NSRange) {
+        insert(text: string, delay: 0)
+    }
+    func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
+        var attrString : NSAttributedString
+        if let aString = string as? NSAttributedString {
+            attrString = aString
+        } else {
+            attrString = NSAttributedString(string: string as! String)
+        }
+        
+        guard !attrString.string.isEmpty else {
+            unmarkText()
+            return
+        }
+        
+        guard let ds = frontMostTerminal else {
+            return
+        }
+        
+        if attrString !== markedText {
+            markedText = attrString
+        }
+        _selectedRange = selectedRange
+        _markedRange.location = 0
+        _markedRange.length = attrString.length
+        let mAttrString = NSMutableAttributedString(attributedString: attrString)
+        mAttrString.addAttribute(NSFontAttributeName, value: textField.defaultFont, range: NSRange(location: 0, length: attrString.length))
+        mAttrString.addAttribute(NSForegroundColorAttributeName, value: NSColor.white, range: NSRange(location: 0, length: attrString.length))
+        
+        textField.string = mAttrString
+        textField.selectedRange = selectedRange
+        textField.markedRange = _markedRange
+        
+        var o = NSPoint(x: CGFloat(ds.cursorColumn) * fontWidth, y: CGFloat(maxRow - 1 - ds.cursorRow) * fontHeight + 5.0)
+        var dy: CGFloat
+        if (o.x + textField.frame.width > CGFloat(maxColumn) * fontWidth) {
+            o.x = CGFloat(maxColumn) * fontWidth - textField.frame.width
+        }
+        if (o.y + textField.frame.height > CGFloat(maxRow) * fontHeight) {
+            o.y = (CGFloat(maxRow - ds.cursorRow)) * fontHeight - 5.0 - textField.frame.height
+            dy = o.y + textField.frame.height
+        } else {
+            dy = o.y
+        }
+        textField.setFrameOrigin(o)
+        textField.destination = textField.convert(NSPoint(x: (CGFloat(ds.cursorColumn) + 0.5) * fontWidth, y: dy), from: self)
+        textField.isHidden = false
+        
+    }
+    func unmarkText() {
+        markedText = nil
+        textField.isHidden = true
+    }
+    
+    func hasMarkedText() -> Bool {
+        return markedText != nil
+    }
+    
+    func selectedRange() -> NSRange {
+        return _selectedRange
+    }
+ 
+    func markedRange() -> NSRange {
+        return _markedRange
+    }
+    
+    func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
+        guard let markedText = markedText else {
+            return nil
+        }
+        var range = range
+        if (range.location >= markedText.length) {
+            return nil
+        }
+        if (range.location + range.length > markedText.length){
+            range.length = markedText.length - range.location
+        }
+        let substring = (markedText.string as NSString).substring(with: range)
+        return NSAttributedString(string: substring)
+    }
+    
+    func validAttributesForMarkedText() -> [String] {
+        return []
+    }
+    
+    func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
+        return textField.window!.convertToScreen(textField.frame)
+    }
+    
+    func characterIndex(for point: NSPoint) -> Int {
+        return 0
     }
 }
 
@@ -768,7 +860,7 @@ extension TermView {
                 break
             }
            
-            if markedText != nil && isArrowKey {
+            if !hasMarkedText() && isArrowKey {
                 ds.updateDoubleByteStateForRow(row: ds.cursorRow)
                 if Int(c) == NSRightArrowFunctionKey && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn).doubleByte == 1
                 || Int(c) == NSLeftArrowFunctionKey && ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2 {
@@ -777,8 +869,10 @@ extension TermView {
                         return
                     }
                 }
+                frontMostConnection?.sendMessage(msg: Data(arrow).subdata(in: 0..<3))
+                return
             }
-            if markedText != nil && Int(c) == NSDeleteCharacter {
+            if !hasMarkedText() && Int(c) == NSDeleteCharacter {
                 if (frontMostConnection?.site.shouldDetectDoubleByte ?? false &&
                     ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2) {
                     frontMostConnection?.sendMessage(msg: Data([UInt8(NSDeleteCharacter), UInt8(NSDeleteCharacter)]))
@@ -792,12 +886,15 @@ extension TermView {
     }
     
 //    override func moveDown(_ sender: Any?) {
+//        
 //        var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
 //        if let ds = frontMostTerminal {
 //            arrow[2] = "A".utf8.first!
 //            arrow[5] = "A".utf8.first!
 //        }
 //    }
+    
+    
     override func flagsChanged(with event: NSEvent) {
         let currentFlags = event.modifierFlags
         if currentFlags.contains(.option) {

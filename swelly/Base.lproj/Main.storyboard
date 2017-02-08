@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
@@ -704,10 +704,19 @@
                             </textField>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="d5b-Y4-iCj" customClass="TermView" customModule="swelly" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="960" height="576"/>
+                                <subviews>
+                                    <customView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hyH-S9-pXA" customClass="MarkedTextView" customModule="swelly" customModuleProvider="target">
+                                        <rect key="frame" x="357" y="270" width="245" height="36"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    </customView>
+                                </subviews>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="960" id="G91-HF-WQ6"/>
                                     <constraint firstAttribute="height" constant="576" id="bA5-aZ-1Rc"/>
                                 </constraints>
+                                <connections>
+                                    <outlet property="textField" destination="hyH-S9-pXA" id="fdn-iN-KvK"/>
+                                </connections>
                             </customView>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Npr-5x-a6d">
                                 <rect key="frame" x="836" y="589" width="110" height="32"/>

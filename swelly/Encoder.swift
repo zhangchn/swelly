@@ -39,6 +39,6 @@ func encodeFromUnicode(_ char: UInt16, to encoding: Encoding) -> UTF16Char {
     var char = char
     let d = String(utf16CodeUnits: &char, count: 1).data(using: encoding.stringEncoding())
     return d!.withUnsafeBytes({ (buff:UnsafePointer<UTF16Char>) -> UTF16Char in
-        return buff[0]
+        return ((buff[0] & 0xff00) >> 8) | ((buff[0] & 0x00ff) << 8)
     })
 }

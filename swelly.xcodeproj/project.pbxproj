@@ -14,6 +14,7 @@
 		DB4382571DA49BB900F0FCE3 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382561DA49BB900F0FCE3 /* Connection.swift */; };
 		DB4382591DA49C3B00F0FCE3 /* Site.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382581DA49C3B00F0FCE3 /* Site.swift */; };
 		DB43825C1DA49D4900F0FCE3 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43825B1DA49D4900F0FCE3 /* Encoder.swift */; };
+		DB76069D1E49C2B500F5D7C8 /* MarkedTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB76069C1E49C2B500F5D7C8 /* MarkedTextView.swift */; };
 		DBC2D19D1DA4A72700B7EED7 /* GlobalConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */; };
 		DBC2D19F1DA4A80100B7EED7 /* CommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */; };
 		DBC2D1A11DA4AB2000B7EED7 /* Terminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBC2D1A01DA4AB2000B7EED7 /* Terminal.swift */; };
@@ -34,6 +35,7 @@
 		DB4382561DA49BB900F0FCE3 /* Connection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
 		DB4382581DA49C3B00F0FCE3 /* Site.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Site.swift; sourceTree = "<group>"; };
 		DB43825B1DA49D4900F0FCE3 /* Encoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
+		DB76069C1E49C2B500F5D7C8 /* MarkedTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkedTextView.swift; sourceTree = "<group>"; };
 		DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConfig.swift; sourceTree = "<group>"; };
 		DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
 		DBC2D1A01DA4AB2000B7EED7 /* Terminal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Terminal.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				DBC2D1AF1DA5FF0E00B7EED7 /* TermView.swift */,
+				DB76069C1E49C2B500F5D7C8 /* MarkedTextView.swift */,
 			);
 			name = "Terminal View";
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 				DBC2D1A11DA4AB2000B7EED7 /* Terminal.swift in Sources */,
 				DB4382591DA49C3B00F0FCE3 /* Site.swift in Sources */,
 				DB4382471DA49B7F00F0FCE3 /* AppDelegate.swift in Sources */,
+				DB76069D1E49C2B500F5D7C8 /* MarkedTextView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
