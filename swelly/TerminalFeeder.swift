@@ -242,6 +242,7 @@ class TerminalFeeder {
     }
     func feed(data: Data, connection: Connection) {
         data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
+            #if DEBUG
             var debugOutput = "feed:"
             for idx in 0..<data.count {
                 switch bytes[idx] {
@@ -263,6 +264,7 @@ class TerminalFeeder {
                 //debugOutput += "(\(bytes[idx])) "
             }
             print(debugOutput)
+            #endif
             feed(bytes: bytes, length: data.count, connection: connection)
         }
     }
@@ -947,7 +949,7 @@ class TerminalFeeder {
                     }
                     let caller = terminal.string(fromIndex: 0, toIndex: column)
                     let message = terminal.string(fromIndex: column, toIndex: stop * column )
-                    print("caller: \(caller); message: \(message)")
+                    n q("caller: \(caller); message: \(message)")
                 default:
                     break
                 }

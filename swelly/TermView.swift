@@ -254,35 +254,36 @@ class TermView: NSView {
                     let isDoubleColor = (fgColorIndexOfAttribute(cells[x - 1].attribute) != fgColorIndexOfAttribute(cells[x].attribute) ||
                         fgBoldOfAttribute(cells[x - 1].attribute) != fgBoldOfAttribute(cells[x].attribute))
                     
-                    let text = ch
+                    //let text = ch
                     
                     let index = x
                     let position = CGPoint(x: CGFloat(x - 1) * fontWidth + cPaddingLeft, y: CGFloat(maxRow - 1 - row) * fontHeight + CTFontGetDescent(cCTFont!) + cPaddingBottom)
-                    buffer.append((isDouble, isDoubleColor, text, index))
-                    positions.append(position)
-                    if x == start {
-                        setNeedsDisplay(NSRect(x: CGFloat(x - 1) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight, width: fontWidth, height: fontHeight))
-                    }
+                    
                     if siteEncoding == .gbk {
                         if cells[x-1].byte < 0x81 ||
                             cells[x-1].byte > 0xfe ||
                             cells[x].byte < 0x40 ||
                             cells[x].byte > 0xfe {
-                            let placeholder = [UInt8(0x86), UInt8(0x40)]
-                            textBytes.append(placeholder[0])
-                            textBytes.append(placeholder[1])
-//                            if ds.dirty[row][x + 1] == false {
-//                                
-//                            }
+                            // XXX: might be a split glyph
                             Swift.print("invalid gbk: \(cells[x-1].byte) \(cells[x].byte) at: \(row) \(x)")
                         } else {
                             textBytes.append(cells[x-1].byte)
                             textBytes.append(cells[x].byte)
+                            buffer.append((isDouble, isDoubleColor, ch, index))
+                            positions.append(position)
                         }
                     } else {
+                        // TODO: Big-5?
                         textBytes.append(cells[x-1].byte)
                         textBytes.append(cells[x].byte)
+                        buffer.append((isDouble, isDoubleColor, ch, index))
+                        positions.append(position)
                     }
+                    
+                    if x == start {
+                        setNeedsDisplay(NSRect(x: CGFloat(x - 1) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight, width: fontWidth, height: fontHeight))
+                    }
+
                     
                 default:
                     NSLog("invalid doubleByte")
