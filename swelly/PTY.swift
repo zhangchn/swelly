@@ -169,7 +169,7 @@ class PTY {
             }
             let argv = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: a.count + 1)
             for (idx, arg) in a.enumerated() {
-                argv[idx] = arg.utf8CString.withUnsafeBytes({ (buf) -> UnsafeMutablePointer<Int8> in
+                argv[idx] = arg.utf8CString.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Int8> in
                     let x = UnsafeMutablePointer<Int8>.allocate(capacity: buf.count + 1)
                     memcpy(x, buf.baseAddress, buf.count)
                     x[buf.count] = 0
