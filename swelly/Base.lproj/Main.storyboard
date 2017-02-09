@@ -688,20 +688,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="960" height="644"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ewy-wU-WTV">
-                                <rect key="frame" x="280" y="593" width="400" height="22"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="400" id="WS2-YZ-VUX"/>
-                                </constraints>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="ssh://{username}@bbs.newsmth.net" drawsBackground="YES" id="ITF-Kl-TUO">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <allowedInputSourceLocales>
-                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
-                                    </allowedInputSourceLocales>
-                                </textFieldCell>
-                            </textField>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="d5b-Y4-iCj" customClass="TermView" customModule="swelly" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="960" height="576"/>
                                 <subviews>
@@ -718,6 +704,20 @@
                                     <outlet property="textField" destination="hyH-S9-pXA" id="fdn-iN-KvK"/>
                                 </connections>
                             </customView>
+                            <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ewy-wU-WTV">
+                                <rect key="frame" x="280" y="593" width="400" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="400" id="WS2-YZ-VUX"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="ssh://{username}@bbs.newsmth.net" drawsBackground="YES" id="ITF-Kl-TUO">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <allowedInputSourceLocales>
+                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                    </allowedInputSourceLocales>
+                                </textFieldCell>
+                            </textField>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Npr-5x-a6d">
                                 <rect key="frame" x="836" y="589" width="110" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -746,6 +746,7 @@
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <customObject id="0Et-fj-fSw" customClass="MainWindowDelegate" customModule="swelly" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="-178" y="931"/>
         </scene>

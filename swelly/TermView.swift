@@ -223,7 +223,7 @@ class TermView: NSView {
         let cPaddingLeft = config.chineseFontPaddingLeft
         let cCTFont = config.chineseFont
         let siteEncoding = frontMostConnection!.site.encoding
-        let end = start
+        var end = start
         var buffer = [(Bool, Bool, unichar, Int)]()
         var textBytes = Data()
         var positions = [CGPoint]()
@@ -232,6 +232,7 @@ class TermView: NSView {
                 if !ds.isDirty(atRow: row, column: x) {
                     continue
                 }
+                end = x
                 switch cells[x].attribute.doubleByte {
                 case 0:
                     let isDouble = false
@@ -270,6 +271,10 @@ class TermView: NSView {
                             let placeholder = [UInt8(0x86), UInt8(0x40)]
                             textBytes.append(placeholder[0])
                             textBytes.append(placeholder[1])
+//                            if ds.dirty[row][x + 1] == false {
+//                                
+//                            }
+                            Swift.print("invalid gbk: \(cells[x-1].byte) \(cells[x].byte) at: \(row) \(x)")
                         } else {
                             textBytes.append(cells[x-1].byte)
                             textBytes.append(cells[x].byte)
@@ -369,10 +374,9 @@ class TermView: NSView {
                             let drawingMode : CGTextDrawingMode = showsHidden && hidden ? .stroke : .fill;
                             
                             context.setTextDrawingMode(drawingMode)
-                            var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len) // UnsafeMutablePointer<CGGlyph>.allocate(capacity: len)
+                            var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len)
                             let glyphRange = CFRangeMake(location, len)
                             CTRunGetGlyphs(run, glyphRange, &glyphs)
-//                            positions.suffix(from: glyphOffset + location).
                             context.showGlyphs(glyphs, at: Array(positions[(glyphOffset + location)..<(glyphOffset + runGlyphIndex)]))
                             location = runGlyphIndex
                             if runGlyphIndex != runGlyphCount {
@@ -521,9 +525,9 @@ class TermView: NSView {
     override class func defaultMenu() -> NSMenu? {
         return NSMenu()
     }
-//    override func hitTest(_ point: NSPoint) -> NSView? {
-//        return self
-//    }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        return self
+    }
     override func resetCursorRects() {
         super.resetCursorRects()
         // TODO: refreshMouseHotspot
@@ -547,7 +551,6 @@ class TermView: NSView {
 }
 
 extension TermView: NSTextInputClient {
-    // MARK: NSTextInputClient
     func insert(text: Any, delay microsecond: Int) {
         guard frontMostTerminal != nil && frontMostConnection!.connected else {
             return
@@ -557,7 +560,6 @@ extension TermView: NSTextInputClient {
         frontMostConnection?.send(text: text as! String, delay: microsecond)
     }
     override func doCommand(by selector: Selector) {
-//        var ch = [UInt8](repeating: 0, count: 10)
         let leftSquare = "[".utf8.first!
         let tilde = "~".utf8.first!
         switch selector {
@@ -593,26 +595,6 @@ extension TermView: NSTextInputClient {
         clearSelection()
         frontMostConnection?.send(text: text)
     }
-//    func setMarked(string: String, selected: NSRange) {
-//        guard !string.isEmpty else { unmarkText(); return; }
-//        if let ds = frontMostTerminal {
-//            markedText = string as AnyObject?
-//            // TODO:
-//            
-//        }
-//    }
-//    func setMarked(text: AnyObject, selected range:NSRange) {
-//        if let attrString = text as? NSAttributedString {
-//            return setMarked(string: attrString.string, selected: range)
-//        } else if let string = text as? String {
-//            return setMarked(string: string, selected: range)
-//        }
-//    }
-//    func unmarkText() {
-//        // TODO:
-//        markedText = nil
-//        textField.isHidden = true
-//    }
     var conversationIdentifier: Int {
         get { return self.hash }
     }
@@ -861,7 +843,7 @@ extension TermView {
             }
            
             if !hasMarkedText() && isArrowKey {
-                ds.updateDoubleByteStateForRow(row: ds.cursorRow)
+                ds.updateDoubleByteState(for: ds.cursorRow)
                 if Int(c) == NSRightArrowFunctionKey && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn).doubleByte == 1
                 || Int(c) == NSLeftArrowFunctionKey && ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2 {
                     if frontMostConnection?.site.shouldDetectDoubleByte ?? false {

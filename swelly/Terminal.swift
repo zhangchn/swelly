@@ -39,7 +39,7 @@ class Terminal {
         let cellTemplate = Cell()
         for _ in 0..<maxRow {
             grid.append([Cell](repeating: cellTemplate, count: maxColumn + 1))
-            dirty.append([Bool](repeating: false, count: maxColumn))
+            dirty.append([Bool](repeating: false, count: maxColumn + 1))
         }
         textBuf = [unichar](repeating: 0, count: maxRow * maxColumn + 1)
         self.clearAll()
@@ -98,7 +98,7 @@ class Terminal {
             let x = i % maxColumn
             let y = i / maxColumn
             if x == 0 && i != fromIndex && i - 1 < toIndex {
-                updateDoubleByteStateForRow(row: y)
+                updateDoubleByteState(for: y)
                 let cr = unichar(0x000d)
                 textBuf[bufLen] = cr
                 bufLen += 1
@@ -154,7 +154,7 @@ class Terminal {
         return grid[index / maxColumn][index % maxColumn]
     }
     
-    func updateDoubleByteStateForRow(row: Int) {
+    func updateDoubleByteState(for row: Int) {
         let currentRow = grid[row]
         var db = 0
         var isDirty = false
@@ -163,7 +163,7 @@ class Terminal {
                 if currentRow[c].byte > 0x7f {
                     db = 1
                     if c < maxColumn {
-                        isDirty = dirty[row][c] || dirty[row][c]
+                        isDirty = dirty[row][c] || dirty[row][c + 1]
                         dirty[row][c] = isDirty
                         dirty[row][c+1] = isDirty
                     }
@@ -182,7 +182,7 @@ class Terminal {
             self.grid[i] = grid[i]
         }
         for i in 0..<maxRow {
-            updateDoubleByteStateForRow(row: i)
+            updateDoubleByteState(for: i)
         }
         updateBBSState()
         delegate?.didUpdate(in: self)

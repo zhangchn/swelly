@@ -13,10 +13,12 @@ class ViewController: NSViewController {
     @IBOutlet weak var connectButton : NSButton!
     
     @IBOutlet weak var siteAddressField: NSTextField!
-    
+    var windowDelegate = MainWindowDelegate()
     override func viewDidAppear() {
         super.viewDidAppear()
         self.view.window?.makeFirstResponder(siteAddressField)
+        self.view.window?.delegate = windowDelegate
+        self.view.window?.isReleasedWhenClosed = false
     }
 
     override var representedObject: Any? {
@@ -44,6 +46,14 @@ class ViewController: NSViewController {
             connectButton.title = "Connect"
         }
     }
+}
 
+class MainWindowDelegate: NSObject, NSWindowDelegate {
+    func windowShouldClose(_ sender: Any) -> Bool {
+        NSApplication.shared().hide(self)
+        return false
+    }
+    
+    
 }
 
