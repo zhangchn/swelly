@@ -949,7 +949,7 @@ class TerminalFeeder {
                     }
                     let caller = terminal.string(fromIndex: 0, toIndex: column)
                     let message = terminal.string(fromIndex: column, toIndex: stop * column )
-                    n q("caller: \(caller); message: \(message)")
+                    print("caller: \(caller); message: \(message)")
                 default:
                     break
                 }
