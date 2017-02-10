@@ -136,7 +136,7 @@ class Terminal {
             return nil
         }
         return textBuf.withUnsafeBufferPointer {
-            String(data: Data(buffer: $0), encoding: String.Encoding.utf16)
+            String(utf16CodeUnits: $0.baseAddress!, count: bufLen)
         }
     }
     func string(atRow row: Int) -> String? {

@@ -125,10 +125,8 @@ class TermView: NSView {
     
     var frontMostConnection: Connection? { get {return connection}}
     
-    var connected: Bool { get {
-        guard self.connection != nil else {return false}
-        return self.connection!.connected
-        }
+    var connected: Bool {
+        return self.connection?.connected ?? false
     }
     
     private func draw(specialSymbol: UTF16Char, row: Int, column: Int) {
@@ -293,8 +291,8 @@ class TermView: NSView {
         }
         // sentinel
         buffer.append((false, false, unichar(0), -1))
-        let encoding = siteEncoding.stringEncoding()
-        let string = String(data: textBytes, encoding: encoding)!
+        let string = String(data: textBytes,
+                            encoding: siteEncoding.stringEncoding)!
         let mutableAttributedString = NSMutableAttributedString(string: string)
         // split by attribute
         ds.withCells(ofRow: row) { (cells) in
@@ -504,7 +502,7 @@ class TermView: NSView {
             }
             NSBezierPath.setDefaultLineWidth(1.0)
          
-            if selectionLength != 0 {
+            if connected && selectionLength != 0 {
                 drawSelection()
             }
         }
@@ -527,7 +525,11 @@ class TermView: NSView {
         return NSMenu()
     }
     override func hitTest(_ point: NSPoint) -> NSView? {
-        return self
+        if super.hitTest(point) != nil {
+            return self
+        } else {
+            return nil
+        }
     }
     override func resetCursorRects() {
         super.resetCursorRects()
@@ -549,6 +551,38 @@ class TermView: NSView {
     var markedText: NSAttributedString?
     var _selectedRange: NSRange = NSMakeRange(0, 0)
     var _markedRange: NSRange = NSMakeRange(0, 0)
+    
+    var selectedRect: NSRect {
+        if selectionLength == 0 {
+            return .zero
+        }
+    
+        let startIndex = selectionLocation
+        var endIndex = startIndex + selectionLength
+        if (selectionLength > 0) {
+            endIndex -= 1
+        }
+    
+        var row = startIndex / maxColumn
+        var column = startIndex % maxColumn
+        var endRow = endIndex / maxColumn
+        var endColumn = endIndex % maxColumn
+    
+        if endRow < row {
+            let temp = row
+            row = endRow
+            endRow = temp - 1
+        }
+        if endColumn < column {
+            let temp = column
+            column = endColumn
+            endColumn = temp - 1
+        }
+        let height = (endRow - row) + 1
+        let width = (endColumn - column) + 1
+    
+        return NSRect(x: column, y: row, width: width, height: height)
+    }
 }
 
 extension TermView: NSTextInputClient {
@@ -695,6 +729,130 @@ extension TermView: NSTextInputClient {
 }
 
 extension TermView {
+    // MARK: Event handling
+    
+    override func mouseDown(with event: NSEvent) {
+        // TODO: reset mouse timer
+        
+        frontMostConnection?.resetMessageCount()
+        self.window?.makeFirstResponder(self)
+        guard connected else {
+            return
+        }
+        if labs(selectionLength) > 0 {
+            isNotCancelingSelection = false
+        }
+        let point = convert(event.locationInWindow, from: nil)
+        selectionLocation = convertIndex(from: point)
+        selectionLength = 0
+        
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        // TODO:
+        guard connected else {
+            return
+        }
+        // open url
+        if labs(selectionLength) <= 1 && isNotCancelingSelection && !isKeying && !inUrlMode {
+            //[_mouseBehaviorDelegate mouseUp:theEvent];
+        }
+        isNotCancelingSelection = true
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        // TODO:
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        // TODO:
+        if (!self.connected) {
+            return;
+        }
+        
+        let point = convert(event.locationInWindow, from:nil)
+        let index = convertIndex(from: point)
+        let oldValue = selectionLength
+        selectionLength = index - selectionLocation + 1
+        if selectionLength <= 0 {
+            selectionLength -= 1
+        }
+        if oldValue != selectionLength {
+            needsDisplay = true
+        }
+        hasRectangleSelected = wantsRectangleSelection;
+    }
+    
+    func convertIndex(from point: NSPoint) -> Int {
+        var point = point
+        if point.x > CGFloat(maxColumn) * fontWidth {
+            point.x = CGFloat(maxColumn) * fontWidth - 0.001
+        }
+        if point.y > CGFloat(maxRow) * fontHeight {
+            point.y = CGFloat(maxRow) * fontHeight - 0.001
+        }
+        if point.x < 0 {
+            point.x = 0
+        }
+        if point.y < 0 {
+            point.y = 0
+        }
+        let cx = Int ( point.x / fontWidth)
+        
+        let cy = maxRow - Int(point.y / fontHeight) - 1
+        return cy * maxColumn + cx
+    }
+}
+
+
+extension TermView {
+    // MARK: Actions
+    @IBAction func copy(_ sender: Any){
+        guard connected, selectionLength > 0 else  {
+            return
+        }
+        
+        let s = selectedPlainString ?? ""
+        
+        /* Color copy */
+        var location: Int, length: Int
+        if (selectionLength >= 0) {
+            location = selectionLocation
+            length = selectionLength
+        } else {
+            location = selectionLocation + selectionLength
+            length = 0 - selectionLength
+        }
+        
+        let pb = NSPasteboard.general()
+        // TODO: ANSIColorPBoardType
+        pb.declareTypes([NSStringPboardType], owner: self)
+        pb.setString(s, forType: NSStringPboardType)
+        
+        if hasRectangleSelected {
+            // TODO:
+//            pb.setData(<#T##data: Data?##Data?#>, forType: ANSIColorPBoardType)
+//            [pb setData:[WLAnsiColorOperationManager ansiColorDataFromTerminal:self.frontMostTerminal
+//                inRect:[self selectedRect]]
+//                forType:ANSIColorPBoardType];
+        } else {
+//            pb.setData(ANSIColorOperationManager.ansiColorData(from: frontMostTerminal!, atLocation: location, length: length), forType: ANSIPBoard)
+//            [pb setData:[WLAnsiColorOperationManager ansiColorDataFromTerminal:self.frontMostTerminal
+//																atLocation:location 
+//                length:length] 
+//                forType:ANSIColorPBoardType];
+        }
+    }
+    
+    func paste(_ sender: Any) {
+        guard connected else {
+            return
+        }
+        performPaste()
+    }
+}
+
+extension TermView {
     func confirmPaste(sheet: NSWindow, returnCode: Int, contextInfo: UnsafeRawPointer){
         if returnCode == NSAlertFirstButtonReturn {
             performPaste()
@@ -720,8 +878,45 @@ extension TermView {
 //        
     }
     
+    func rectAt(_ row:NSInteger,
+                _ column:NSInteger,
+                _ height:NSInteger,
+                _ width:NSInteger) -> NSRect{
+        return NSMakeRect(CGFloat(column) * fontWidth, CGFloat(maxRow - height - row) * fontHeight,
+                          CGFloat(width) * fontWidth, CGFloat(height) * fontHeight)
+    }
+
+    
     func drawSelection() {
-        // TODO:
+        var (start, length) = selectionLength >= 0 ?
+            (selectionLocation, selectionLength) :
+            (selectionLocation + selectionLength, -selectionLength)
+        var (x, y) = (start % maxColumn, start / maxColumn)
+        NSColor(calibratedRed: 0.6, green: 0.9,
+                blue: 0.6, alpha: 0.4).set()
+        if hasRectangleSelected {
+            // Rectangle
+            let rect = selectedRect
+            let drawingRect = rectAt(NSInteger(rect.origin.y), NSInteger(rect.origin.x),
+                                     NSInteger(rect.size.height), NSInteger(rect.size.width))
+            
+            NSBezierPath.fill(drawingRect)
+        } else {
+            
+            while length > 0 {
+                if (x + length <= maxColumn) { // one-line
+                    NSBezierPath.fill(NSMakeRect(CGFloat(x) * fontWidth, CGFloat(maxRow - y - 1) * fontHeight,
+                                                 fontWidth * CGFloat(length), fontHeight))
+                    length = 0;
+                } else {
+                    NSBezierPath.fill(NSMakeRect(CGFloat(x) * fontWidth, CGFloat(maxRow - y - 1) * fontHeight,
+                                                 fontWidth * CGFloat(maxColumn - x), fontHeight))
+                    length -= maxColumn - x
+                }
+                x = 0
+                y += 1
+            }
+        }
     }
     
 }
@@ -899,20 +1094,20 @@ extension TermView {
 
 extension TermView {
     // MARK: Accessor
-    func selectedPlainString() -> String? {
-        // TODO:
-        if selectionLength == 0 {
-            return nil
-        }
-        if hasRectangleSelected {
-            if selectionLength >= 0 {
+    var selectedPlainString: String? {
+        get  {
+            if selectionLength == 0 {
+                return nil
+            }
+            if !hasRectangleSelected {
+                let (start, end) = selectionLength >= 0 ?
+                    (selectionLocation, selectionLength + selectionLocation) :
+                    (selectionLocation + selectionLength, selectionLocation)
+                return frontMostTerminal?.string(fromIndex: start, toIndex: end)
+            } else {
                 // TODO:
                 return nil
             }
-            return nil
-        } else {
-            // TODO:
-            return nil
         }
     }
     var shouldEnableMouse : Bool  {
