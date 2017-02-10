@@ -293,8 +293,8 @@ class TermView: NSView {
         }
         // sentinel
         buffer.append((false, false, unichar(0), -1))
-        let encoding = siteEncoding.stringEncoding()
-        let string = String(data: textBytes, encoding: encoding)!
+        let string = String(data: textBytes,
+                            encoding: siteEncoding.stringEncoding)!
         let mutableAttributedString = NSMutableAttributedString(string: string)
         // split by attribute
         ds.withCells(ofRow: row) { (cells) in
@@ -504,7 +504,7 @@ class TermView: NSView {
             }
             NSBezierPath.setDefaultLineWidth(1.0)
          
-            if selectionLength != 0 {
+            if connected && selectionLength != 0 {
                 drawSelection()
             }
         }
@@ -691,6 +691,124 @@ extension TermView: NSTextInputClient {
     
     func characterIndex(for point: NSPoint) -> Int {
         return 0
+    }
+}
+
+extension TermView {
+    // MARK: Event handling
+    
+    override func mouseDown(with event: NSEvent) {
+        // TODO: reset mouse timer
+        
+        frontMostConnection?.resetMessageCount()
+        self.window?.makeFirstResponder(self)
+        guard connected else {
+            return
+        }
+        if labs(selectionLength) > 0 {
+            isNotCancelingSelection = false
+        }
+        let point = convert(event.locationInWindow, from: nil)
+        selectionLocation = convertIndex(from: point)
+        selectionLength = 0
+        
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        // TODO:
+        guard connected else {
+            return
+        }
+        // open url
+        if labs(selectionLength) <= 1 && isNotCancelingSelection && !isKeying && !inUrlMode {
+            //[_mouseBehaviorDelegate mouseUp:theEvent];
+        }
+        isNotCancelingSelection = true
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        // TODO:
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        // TODO:
+        if (!self.connected) {
+            return;
+        }
+        
+        let point = convert(event.locationInWindow, from:nil)
+        let index = convertIndex(from: point)
+        let oldValue = selectionLength
+        selectionLength = index - selectionLocation + 1
+        if selectionLength <= 0 {
+            selectionLength -= 1
+        }
+        if oldValue != selectionLength {
+            needsDisplay = true
+        }
+        hasRectangleSelected = wantsRectangleSelection;
+    }
+    
+    func convertIndex(from point: NSPoint) -> Int {
+        var point = point
+        if point.x > CGFloat(maxColumn) * fontWidth {
+            point.x = CGFloat(maxColumn) * fontWidth - 0.001
+        }
+        if point.y > CGFloat(maxRow) * fontHeight {
+            point.y = CGFloat(maxRow) * fontHeight - 0.001
+        }
+        if point.x < 0 {
+            point.x = 0
+        }
+        if point.y < 0 {
+            point.y = 0
+        }
+        let cx = Int ( point.x / fontWidth)
+        
+        let cy = maxRow - Int(point.y / fontHeight) - 1
+        return cy * maxColumn + cx
+    }
+}
+
+
+extension TermView {
+    // MARK: Actions
+    @IBAction func copy(_ sender: Any){
+        guard connected, selectionLength > 0 else  {
+            return
+        }
+        
+        let s = selectedPlainString ?? ""
+        
+        /* Color copy */
+        var location: Int, length: Int
+        if (selectionLength >= 0) {
+            location = selectionLocation
+            length = selectionLength
+        } else {
+            location = selectionLocation + selectionLength
+            length = 0 - selectionLength
+        }
+        
+        let pb = NSPasteboard.general()
+        // TODO: ANSIColorPBoardType
+        pb.declareTypes([NSStringPboardType], owner: self)
+        pb.setString(s, forType: NSStringPboardType)
+        
+        if hasRectangleSelected {
+            // TODO:
+//            pb.setData(<#T##data: Data?##Data?#>, forType: ANSIColorPBoardType)
+//            [pb setData:[WLAnsiColorOperationManager ansiColorDataFromTerminal:self.frontMostTerminal
+//                inRect:[self selectedRect]]
+//                forType:ANSIColorPBoardType];
+        } else {
+//            pb.setData(ANSIColorOperationManager.ansiColorData(from: frontMostTerminal!, atLocation: location, length: length), forType: ANSIPBoard)
+//            [pb setData:[WLAnsiColorOperationManager ansiColorDataFromTerminal:self.frontMostTerminal
+//																atLocation:location 
+//                length:length] 
+//                forType:ANSIColorPBoardType];
+        }
+
     }
 }
 
@@ -899,20 +1017,20 @@ extension TermView {
 
 extension TermView {
     // MARK: Accessor
-    func selectedPlainString() -> String? {
-        // TODO:
-        if selectionLength == 0 {
-            return nil
-        }
-        if hasRectangleSelected {
-            if selectionLength >= 0 {
+    var selectedPlainString: String? {
+        get  {
+            if selectionLength == 0 {
+                return nil
+            }
+            if !hasRectangleSelected {
+                let (start, end) = selectionLength >= 0 ?
+                    (selectionLocation, selectionLength + selectionLocation) :
+                    (selectionLocation + selectionLength, selectionLocation)
+                return frontMostTerminal?.string(fromIndex: start, toIndex: end)
+            } else {
                 // TODO:
                 return nil
             }
-            return nil
-        } else {
-            // TODO:
-            return nil
         }
     }
     var shouldEnableMouse : Bool  {
