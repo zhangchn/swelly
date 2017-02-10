@@ -12,7 +12,7 @@ import CoreFoundation.CFStringEncodingExt
 enum Encoding : Int {
     case gbk = 0
     case big5 = 1
-    func stringEncoding() -> String.Encoding {
+    var stringEncoding: String.Encoding {
         var encodingValue : CFStringEncoding
         switch self {
         case .gbk:
@@ -31,13 +31,13 @@ func encodeToUnicode(_ char: UInt16, from encoding: Encoding) -> UTF16Char {
         buffer[0] = UInt8((char & 0xff00) >> 8) + 0x80
         buffer[1] = UInt8(char & 0x00ff)
     }
-    let s = String(data: d, encoding: encoding.stringEncoding()) ?? "？"
+    let s = String(data: d, encoding: encoding.stringEncoding) ?? "？"
     return s.utf16.first!.littleEndian
 }
 
 func encodeFromUnicode(_ char: UInt16, to encoding: Encoding) -> UTF16Char {
     var char = char
-    let d = String(utf16CodeUnits: &char, count: 1).data(using: encoding.stringEncoding())
+    let d = String(utf16CodeUnits: &char, count: 1).data(using: encoding.stringEncoding)
     return d!.withUnsafeBytes({ (buff:UnsafePointer<UTF16Char>) -> UTF16Char in
         return ((buff[0] & 0xff00) >> 8) | ((buff[0] & 0x00ff) << 8)
     })

@@ -102,6 +102,13 @@ struct Cell {
     }
     var attribute = Attribute(rawValue: 0)!
     var byte: UInt8 = 0
+    
+    var isEmpty: Bool {
+        return !(byte == 0 ||
+            attribute.bgColor == 9 ||
+            attribute.underline == false ||
+            attribute.reverse == false)
+    }
 }
 
 enum BBSType {
