@@ -551,6 +551,38 @@ class TermView: NSView {
     var markedText: NSAttributedString?
     var _selectedRange: NSRange = NSMakeRange(0, 0)
     var _markedRange: NSRange = NSMakeRange(0, 0)
+    
+    var selectedRect: NSRect {
+        if selectionLength == 0 {
+            return .zero
+        }
+    
+        let startIndex = selectionLocation
+        var endIndex = startIndex + selectionLength
+        if (selectionLength > 0) {
+            endIndex -= 1
+        }
+    
+        var row = startIndex / maxColumn
+        var column = startIndex % maxColumn
+        var endRow = endIndex / maxColumn
+        var endColumn = endIndex % maxColumn
+    
+        if endRow < row {
+            let temp = row
+            row = endRow
+            endRow = temp - 1
+        }
+        if endColumn < column {
+            let temp = column
+            column = endColumn
+            endColumn = temp - 1
+        }
+        let height = (endRow - row) + 1
+        let width = (endColumn - column) + 1
+    
+        return NSRect(x: column, y: row, width: width, height: height)
+    }
 }
 
 extension TermView: NSTextInputClient {
@@ -846,8 +878,45 @@ extension TermView {
 //        
     }
     
+    func rectAt(_ row:NSInteger,
+                _ column:NSInteger,
+                _ height:NSInteger,
+                _ width:NSInteger) -> NSRect{
+        return NSMakeRect(CGFloat(column) * fontWidth, CGFloat(maxRow - height - row) * fontHeight,
+                          CGFloat(width) * fontWidth, CGFloat(height) * fontHeight)
+    }
+
+    
     func drawSelection() {
-        // TODO:
+        var (start, length) = selectionLength >= 0 ?
+            (selectionLocation, selectionLength) :
+            (selectionLocation + selectionLength, -selectionLength)
+        var (x, y) = (start % maxColumn, start / maxColumn)
+        NSColor(calibratedRed: 0.6, green: 0.9,
+                blue: 0.6, alpha: 0.4).set()
+        if hasRectangleSelected {
+            // Rectangle
+            let rect = selectedRect
+            let drawingRect = rectAt(NSInteger(rect.origin.y), NSInteger(rect.origin.x),
+                                     NSInteger(rect.size.height), NSInteger(rect.size.width))
+            
+            NSBezierPath.fill(drawingRect)
+        } else {
+            
+            while length > 0 {
+                if (x + length <= maxColumn) { // one-line
+                    NSBezierPath.fill(NSMakeRect(CGFloat(x) * fontWidth, CGFloat(maxRow - y - 1) * fontHeight,
+                                                 fontWidth * CGFloat(length), fontHeight))
+                    length = 0;
+                } else {
+                    NSBezierPath.fill(NSMakeRect(CGFloat(x) * fontWidth, CGFloat(maxRow - y - 1) * fontHeight,
+                                                 fontWidth * CGFloat(maxColumn - x), fontHeight))
+                    length -= maxColumn - x
+                }
+                x = 0
+                y += 1
+            }
+        }
     }
     
 }
