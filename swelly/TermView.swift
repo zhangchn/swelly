@@ -125,10 +125,8 @@ class TermView: NSView {
     
     var frontMostConnection: Connection? { get {return connection}}
     
-    var connected: Bool { get {
-        guard self.connection != nil else {return false}
-        return self.connection!.connected
-        }
+    var connected: Bool {
+        return self.connection?.connected ?? false
     }
     
     private func draw(specialSymbol: UTF16Char, row: Int, column: Int) {
@@ -527,7 +525,11 @@ class TermView: NSView {
         return NSMenu()
     }
     override func hitTest(_ point: NSPoint) -> NSView? {
-        return self
+        if super.hitTest(point) != nil {
+            return self
+        } else {
+            return nil
+        }
     }
     override func resetCursorRects() {
         super.resetCursorRects()
@@ -808,7 +810,13 @@ extension TermView {
 //                length:length] 
 //                forType:ANSIColorPBoardType];
         }
-
+    }
+    
+    func paste(_ sender: Any) {
+        guard connected else {
+            return
+        }
+        performPaste()
     }
 }
 
