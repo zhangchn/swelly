@@ -9,7 +9,7 @@
 import Foundation
 import Darwin
 
-protocol PTYDelegate {
+protocol PTYDelegate: NSObjectProtocol {
     func ptyWillConnect(_ pty: PTY)
     func ptyDidConnect(_ pty: PTY)
     func pty(_ pty: PTY, didRecv data: Data)
@@ -74,7 +74,7 @@ func fdSet(_ fd: Int32, set: inout fd_set) {
 }
 
 class PTY {
-    var delegate: PTYDelegate?
+    weak var delegate: PTYDelegate?
     var proxyType: ProxyType
     var proxyAddress: String
     private var connecting = false
@@ -109,8 +109,16 @@ class PTY {
         var fmt: String!
         if addr.lowercased().hasPrefix("ssh://") {
             ssh = true
-            addr = String(addr.utf8.suffix(addr.characters.count - 6))!
             
+            // XXX: Swift stdlib bug? crashed every second time from IBAction call
+//            let idx16 = addr.utf16.startIndex.advanced(by: 6)
+//            let idx = String.Index(idx16, within: addr)!
+//            addr = addr.substring(from: idx)
+
+            // Workaround: use NSString
+            let naddr = addr as NSString
+            let range = NSMakeRange(6, naddr.length - 6)
+            addr = naddr.substring(with: range) as String
         } else {
             if let range = addr.range(of: "://") {
                 addr = addr.substring(from: range.upperBound)
@@ -154,21 +162,23 @@ class PTY {
         let ws_col = GlobalConfig.sharedInstance.column
         let ws_row = GlobalConfig.sharedInstance.row
         var size = winsize(ws_row: UInt16(ws_row), ws_col: UInt16(ws_col), ws_xpixel: 0, ws_ypixel: 0)
+        var arguments = PTY.parse(addr: addr).components(separatedBy: " ")
         pid = forkpty(&fd, slaveName, &term, &size)
-        if pid == 0 {
+        if pid < 0 {
+            print("Error forking pty: \(errno)")
+        } else if pid == 0 {
             // child process
             //kill(0, SIGSTOP)
-            var a = PTY.parse(addr: addr).components(separatedBy: " ")
-            if let b = a.first {
+            if let b = arguments.first {
                 if b.hasSuffix("ssh") {
                     if let proxyCommand = Proxy.proxyCommand(address: proxyAddress, type: proxyType) {
-                        a.append("-o")
-                        a.append(proxyCommand)
+                        arguments.append("-o")
+                        arguments.append(proxyCommand)
                     }
                 }
             }
-            let argv = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: a.count + 1)
-            for (idx, arg) in a.enumerated() {
+            let argv = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: arguments.count + 1)
+            for (idx, arg) in arguments.enumerated() {
                 argv[idx] = arg.utf8CString.withUnsafeBytes({ (buf) -> UnsafeMutablePointer<Int8> in
                     let x = UnsafeMutablePointer<Int8>.allocate(capacity: buf.count + 1)
                     memcpy(x, buf.baseAddress, buf.count)
@@ -176,18 +186,24 @@ class PTY {
                     return x
                 })
             }
-            argv[a.count] = nil
+            argv[arguments.count] = nil
             execvp(argv[0], argv)
             perror(argv[0])
             
             sleep(UINT32_MAX)
         } else {
+            // parent process
             var one = 1
-            _ = ioctl(fd, TIOCPKT, &one)
-            Thread.detachNewThread {
-                self.readLoop()
+            let result = ioctl(fd, TIOCPKT, &one)
+            if result == 0 {
+                Thread.detachNewThread {
+                    self.readLoop()
+                }
+            } else {
+                print("ioctl failure: erron: \(errno)")
             }
         }
+        slaveName.deallocate(capacity: Int(PATH_MAX))
         connecting = true
         delegate?.ptyWillConnect(self)
         return true
@@ -260,41 +276,44 @@ class PTY {
         
         let buf = UnsafeMutablePointer<Int8>.allocate(capacity: 4096)
         var iterationCount = 0
-        var result = Int32(0)
-        while !exit {
-            iterationCount += 1
-            fdZero(&readfds)
-            fdZero(&errorfds)
-            fdSet(fd, set: &readfds)
-            fdSet(fd, set: &errorfds)
-            
-            result = select(fd + 1, &readfds, nil, &errorfds, nil)
-            if result < 0 {
-                break
-            } else if __darwin_fd_isset(fd, &errorfds) != 0 {
-                result = Int32(read(fd, buf, 1))
-                if result == 0 {
-                    exit = true
-                }
-            } else if __darwin_fd_isset(fd, &readfds) != 0 {
-                result = Int32(read(fd, buf, 4096))
-                if result > 1 {
-                    let d =  Data(buffer: UnsafeBufferPointer<Int8>(start: buf.advanced(by: 1), count: result - 1))
-                    DispatchQueue.main.async {
-                        self.recv(data: d)
+        let result = autoreleasepool { () -> Int32 in
+            var result = Int32(0)
+            while !exit {
+                iterationCount += 1
+                fdZero(&readfds)
+                fdZero(&errorfds)
+                fdSet(fd, set: &readfds)
+                fdSet(fd, set: &errorfds)
+                
+                result = select(fd.advanced(by: 1), &readfds, nil, &errorfds, nil)
+                if result < 0 {
+                    print("")
+                    break
+                } else if __darwin_fd_isset(fd, &errorfds) != 0 {
+                    result = Int32(read(fd, buf, 1))
+                    if result == 0 {
+                        exit = true
                     }
-                } else if result == 0 {
-                    exit = true
+                    
+                } else if __darwin_fd_isset(fd, &readfds) != 0 {
+                    result = Int32(read(fd, buf, 4096))
+                    if result > 1 {
+                        let d =  Data(buffer: UnsafeBufferPointer<Int8>(start: buf.advanced(by: 1), count: Int(result)-1))
+                        DispatchQueue.main.async {
+                            self.recv(data: d)
+                        }
+                    } else if result == 0 {
+                        exit = true
+                    }
                 }
             }
-            if iterationCount % 5000 == 0 {
-                iterationCount = 1
-            }
+            return result
         }
         if result >= 0 {
             DispatchQueue.main.async {
                 self.close()
             }
         }
+        buf.deallocate(capacity: 4096)
     }
 }

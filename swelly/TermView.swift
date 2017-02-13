@@ -952,7 +952,12 @@ extension TermView {
 extension TermView {
     // MARK: Event handling
     func clearSelection() {
-        // TODO:
+        if selectionLength > 0 {
+            selectionLength = 0
+            isNotCancelingSelection = false
+            hasRectangleSelected = false
+            needsDisplay = true
+        }
     }
     
     override func scrollWheel(with event: NSEvent) {

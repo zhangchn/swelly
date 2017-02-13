@@ -8,7 +8,7 @@
 
 import AppKit
 
-class Connection : PTYDelegate {
+class Connection : NSObject, PTYDelegate {
     var icon: NSImage?
     var processing: Bool = false
     
@@ -41,6 +41,9 @@ class Connection : PTYDelegate {
         self.site = site
         messageDelegate = MessageDelegate()
         terminalFeeder = TerminalFeeder()
+    }
+    
+    func setup() {
         if !site.isDummy {
             pty = PTY(proxyAddress: site.proxyAddress, proxyType: site.proxyType)
             pty!.delegate = self

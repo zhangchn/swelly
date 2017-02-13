@@ -32,17 +32,17 @@ class ViewController: NSViewController {
             let site = Site()
             site.address = siteAddressField.stringValue
             let connection = Connection(site: site)
+            connection.setup()
             let term = Terminal()
             term.delegate = termView
             connection.terminal = term
-            //term.connection = connection
             termView.connection = connection
             connectButton.title = "Disconnect"
-            siteAddressField.isEditable = false
+            //siteAddressField.isEditable = false
             
         } else {
             termView.connection?.close()
-            siteAddressField.isEditable = true
+            //siteAddressField.isEditable = true
             connectButton.title = "Connect"
         }
     }

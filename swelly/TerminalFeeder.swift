@@ -914,10 +914,6 @@ class TerminalFeeder {
                     csArg = []
                     state = .TP_NORMAL
                 }
-                
-                
-//                csArg = []
-//                state = .TP_NORMAL
             case .TP_SCS:
                 state = .TP_NORMAL
             }
@@ -949,7 +945,7 @@ class TerminalFeeder {
                     }
                     let caller = terminal.string(fromIndex: 0, toIndex: column)
                     let message = terminal.string(fromIndex: column, toIndex: stop * column )
-                    print("caller: \(caller); message: \(message)")
+                    print("caller: \(String(describing: caller)); message: \(String(describing: message))")
                 default:
                     break
                 }
