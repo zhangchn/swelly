@@ -31,16 +31,14 @@ class Connection : NSObject, PTYDelegate {
             terminalFeeder.terminal = terminal
         }
     }
-    var terminalFeeder: TerminalFeeder
+    var terminalFeeder = TerminalFeeder()
     var pty: PTY?
     var site: Site
-    var messageDelegate: MessageDelegate
+    var messageDelegate = MessageDelegate()
     var messageCount: Int = 0
     
     init(site: Site){
         self.site = site
-        messageDelegate = MessageDelegate()
-        terminalFeeder = TerminalFeeder()
     }
     
     func setup() {
