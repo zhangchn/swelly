@@ -370,13 +370,19 @@ class TermView: NSView {
                             lastDoubleByte = buffer[runGlyphIndex + glyphOffset].0
                             
                             let len = runGlyphIndex - location
-                            let drawingMode : CGTextDrawingMode = showsHidden && hidden ? .stroke : .fill;
-                            
-                            context.setTextDrawingMode(drawingMode)
-                            var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len)
-                            let glyphRange = CFRangeMake(location, len)
-                            CTRunGetGlyphs(run, glyphRange, &glyphs)
-                            context.showGlyphs(glyphs, at: Array(positions[(glyphOffset + location)..<(glyphOffset + runGlyphIndex)]))
+                            // XXX: if length of the glyphRange is zero,
+                            // CTRunGetGlyphs would copy buffer til the end of run
+                            // and corrupt other memory!
+                            if len > 0 {
+                                let drawingMode : CGTextDrawingMode = showsHidden && hidden ? .stroke : .fill;
+                                
+                                context.setTextDrawingMode(drawingMode)
+                                var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len)
+                                let glyphRange = CFRangeMake(location, len)
+                                
+                                CTRunGetGlyphs(run, glyphRange, &glyphs)
+                                context.showGlyphs(glyphs, at: Array(positions[(glyphOffset + location)..<(glyphOffset + runGlyphIndex)]))
+                            }
                             location = runGlyphIndex
                             if runGlyphIndex != runGlyphCount {
                                 hidden = isHiddenAttribute(cells[index].attribute)

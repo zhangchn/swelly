@@ -110,15 +110,9 @@ class PTY {
         if addr.lowercased().hasPrefix("ssh://") {
             ssh = true
             
-            // XXX: Swift stdlib bug? crashed every second time from IBAction call
-//            let idx16 = addr.utf16.startIndex.advanced(by: 6)
-//            let idx = String.Index(idx16, within: addr)!
-//            addr = addr.substring(from: idx)
-
-            // Workaround: use NSString
-            let naddr = addr as NSString
-            let range = NSMakeRange(6, naddr.length - 6)
-            addr = naddr.substring(with: range) as String
+            let idx16 = addr.utf16.startIndex.advanced(by: 6)
+            let idx = String.Index(idx16, within: addr)!
+            addr = addr.substring(from: idx)
         } else {
             if let range = addr.range(of: "://") {
                 addr = addr.substring(from: range.upperBound)
