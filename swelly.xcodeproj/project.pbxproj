@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DB18E8FB1E552F610069FC1E /* EffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB18E8FA1E552F610069FC1E /* EffectView.swift */; };
 		DB4382471DA49B7F00F0FCE3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382461DA49B7F00F0FCE3 /* AppDelegate.swift */; };
 		DB4382491DA49B7F00F0FCE3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4382481DA49B7F00F0FCE3 /* ViewController.swift */; };
 		DB43824B1DA49B7F00F0FCE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB43824A1DA49B7F00F0FCE3 /* Assets.xcassets */; };
@@ -26,6 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DB18E8FA1E552F610069FC1E /* EffectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EffectView.swift; sourceTree = "<group>"; };
 		DB4382431DA49B7F00F0FCE3 /* swelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = swelly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB4382461DA49B7F00F0FCE3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DB4382481DA49B7F00F0FCE3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 			children = (
 				DBC2D1AF1DA5FF0E00B7EED7 /* TermView.swift */,
 				DB76069C1E49C2B500F5D7C8 /* MarkedTextView.swift */,
+				DB18E8FA1E552F610069FC1E /* EffectView.swift */,
 			);
 			name = "Terminal View";
 			sourceTree = "<group>";
@@ -236,6 +239,7 @@
 				DBC2D1A81DA4E9E400B7EED7 /* MessageDelegate.swift in Sources */,
 				DBC2D1A11DA4AB2000B7EED7 /* Terminal.swift in Sources */,
 				DB4382591DA49C3B00F0FCE3 /* Site.swift in Sources */,
+				DB18E8FB1E552F610069FC1E /* EffectView.swift in Sources */,
 				DB4382471DA49B7F00F0FCE3 /* AppDelegate.swift in Sources */,
 				DB76069D1E49C2B500F5D7C8 /* MarkedTextView.swift in Sources */,
 			);
