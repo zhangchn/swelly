@@ -12,7 +12,7 @@ class TermView: NSView {
     
     var fontWidth: CGFloat
     
-    var fontHeight: CoreGraphics.CGFloat
+    var fontHeight: CGFloat
     
     var maxRow: Int
     
@@ -44,8 +44,10 @@ class TermView: NSView {
     // TODO: mouse behavior
 //    var mouseBehaviorDelegate: MouseBehaviorManager!
     //var asciiArtRender
+    override var preservesContentDuringLiveResize: Bool { return true }
     
     override init(frame: NSRect) {
+        
         let config = GlobalConfig.sharedInstance
         fontWidth = config.cellWidth
         fontHeight = config.cellHeight
@@ -471,7 +473,44 @@ class TermView: NSView {
         
     }
     
+    
+    var liveResizeCache : NSImage?
+    var liveResizeCacheBounds : NSRect?
+    override func viewWillStartLiveResize() {
+        super.viewWillStartLiveResize()
+        liveResizeCache = NSImage(data: dataWithPDF(inside: bounds))
+        liveResizeCacheBounds = bounds
+    }
+    
+    override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        fontHeight = bounds.height / CGFloat(maxRow)
+        fontWidth = bounds.width / CGFloat(maxColumn)
+        let config = GlobalConfig.sharedInstance
+        config.cellHeight = fontHeight
+        config.cellWidth = fontWidth
+        config.englishFontSize = 18.0 / 24.0 * fontHeight
+        config.chineseFontSize = 22.0 / 24.0 * fontHeight
+        config.chineseFont = CTFontCreateWithName(config.chineseFontName as CFString, config.chineseFontSize, nil)
+        config.englishFont = CTFontCreateWithName(config.englishFontName as CFString, config.englishFontSize, nil)
+        
+        for i in 0..<2 {
+            for j in 0..<10 {
+                config.cCTAttribute[i][j][String(kCTFontAttributeName)] = config.chineseFont
+                config.eCTAttribute[i][j][String(kCTFontAttributeName)] = config.englishFont
+            }
+        }
+        refreshDisplay()
+    }
+    
     override func draw(_ dirtyRect: NSRect) {
+        
+        if inLiveResize {
+            if let cache = liveResizeCache, let cacheBounds = liveResizeCacheBounds {
+                cache.draw(in: bounds, from: cacheBounds, operation: .copy, fraction: 1.0)
+            }
+            return
+        }
         GlobalConfig.sharedInstance.colorBG.set()
         NSRectFill(bounds)
         if connected {
