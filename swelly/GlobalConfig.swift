@@ -127,8 +127,8 @@ class GlobalConfig {
         cellHeight = 24
         chineseFontName = "STHeiti"
         englishFontName = "Monaco"
-        chineseFontSize = 22
-        englishFontSize = 18
+        chineseFontSize = 22 / 24 * cellHeight
+        englishFontSize = 18 / 24 * cellHeight
     }
     
     func refreshFonts() {

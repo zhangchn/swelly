@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -669,7 +670,7 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="960" height="664"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
-                        <value key="minSize" type="size" width="960" height="664"/>
+                        <value key="minSize" type="size" width="480" height="376"/>
                         <value key="maxSize" type="size" width="960" height="664"/>
                     </window>
                     <connections>
@@ -697,18 +698,14 @@
                                     </customView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="960" id="G91-HF-WQ6"/>
-                                    <constraint firstAttribute="height" constant="576" id="bA5-aZ-1Rc"/>
+                                    <constraint firstAttribute="width" secondItem="d5b-Y4-iCj" secondAttribute="height" multiplier="5:3" id="pAJ-m1-2om"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="textField" destination="hyH-S9-pXA" id="fdn-iN-KvK"/>
                                 </connections>
                             </customView>
                             <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ewy-wU-WTV">
-                                <rect key="frame" x="280" y="593" width="400" height="22"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="400" id="WS2-YZ-VUX"/>
-                                </constraints>
+                                <rect key="frame" x="9" y="593" width="823" height="22"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="ssh://{username}@bbs.newsmth.net" drawsBackground="YES" id="ITF-Kl-TUO">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
@@ -718,9 +715,8 @@
                                     </allowedInputSourceLocales>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Npr-5x-a6d">
-                                <rect key="frame" x="836" y="589" width="110" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Npr-5x-a6d">
+                                <rect key="frame" x="854" y="587" width="92" height="32"/>
                                 <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3z8-6Y-aUH">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -732,10 +728,13 @@
                         </subviews>
                         <constraints>
                             <constraint firstItem="d5b-Y4-iCj" firstAttribute="top" secondItem="ewy-wU-WTV" secondAttribute="bottom" constant="17" id="0FX-7o-O7Q"/>
-                            <constraint firstItem="ewy-wU-WTV" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="0xy-60-MZg"/>
+                            <constraint firstItem="Npr-5x-a6d" firstAttribute="centerY" secondItem="ewy-wU-WTV" secondAttribute="centerY" id="6av-ke-bgT"/>
+                            <constraint firstItem="ewy-wU-WTV" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="9" id="78U-2z-eD2"/>
+                            <constraint firstAttribute="trailing" secondItem="Npr-5x-a6d" secondAttribute="trailing" constant="20" id="AJr-Gi-FGK"/>
                             <constraint firstItem="d5b-Y4-iCj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Cgn-Mv-jBl"/>
                             <constraint firstItem="ewy-wU-WTV" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="29" id="MgC-3Q-4cL"/>
                             <constraint firstAttribute="trailing" secondItem="d5b-Y4-iCj" secondAttribute="trailing" id="VDs-Lj-NX7"/>
+                            <constraint firstItem="Npr-5x-a6d" firstAttribute="leading" secondItem="ewy-wU-WTV" secondAttribute="trailing" constant="28" id="aRg-9l-Qaj"/>
                             <constraint firstAttribute="bottom" secondItem="d5b-Y4-iCj" secondAttribute="bottom" id="oHv-7t-MGS"/>
                         </constraints>
                     </view>
