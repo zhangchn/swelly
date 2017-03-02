@@ -14,6 +14,7 @@ class ViewController: NSViewController {
     
     @IBOutlet weak var siteAddressField: NSTextField!
     var windowDelegate = MainWindowDelegate()
+    var idleTimer: Timer!
     override func viewDidAppear() {
         super.viewDidAppear()
         self.view.window?.makeFirstResponder(siteAddressField)
@@ -21,6 +22,19 @@ class ViewController: NSViewController {
         self.view.window?.isReleasedWhenClosed = false
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        idleTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { [weak self](timer) in
+            let termView = self!.termView!
+            if termView.connected {
+                termView.connection?.sendAntiIdle()
+            } else {
+                self!.connectButton.title = "Connect"
+            }
+        })
+    }
+    
     override var representedObject: Any? {
         didSet {
         // Update the view, if already loaded.

@@ -91,6 +91,12 @@ class Connection : NSObject, PTYDelegate {
         pty?.send(data:msg)
     }
     
+    func sendAntiIdle() {
+        // 6 zeroed bytes:
+        let message = Data(count: 6)
+        sendMessage(msg: message)
+    }
+    
     func login() {
         let addr = site.address
         let account = addr.utf8
