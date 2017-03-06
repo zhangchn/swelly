@@ -853,7 +853,7 @@ extension TermView {
 extension TermView {
     // MARK: Actions
     @IBAction func copy(_ sender: Any){
-        guard connected, selectionLength > 0 else  {
+        guard connected, selectionLength != 0 else  {
             return
         }
         
