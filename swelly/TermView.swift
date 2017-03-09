@@ -482,8 +482,7 @@ class TermView: NSView {
         liveResizeCacheBounds = bounds
     }
     
-    override func viewDidEndLiveResize() {
-        super.viewDidEndLiveResize()
+    func adjustFonts() {
         fontHeight = bounds.height / CGFloat(maxRow)
         fontWidth = bounds.width / CGFloat(maxColumn)
         let config = GlobalConfig.sharedInstance
@@ -501,6 +500,11 @@ class TermView: NSView {
             }
         }
         refreshDisplay()
+    }
+    
+    override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        adjustFonts()
     }
     
     override func draw(_ dirtyRect: NSRect) {

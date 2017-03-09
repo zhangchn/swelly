@@ -15,6 +15,11 @@ class ViewController: NSViewController {
     @IBOutlet weak var siteAddressField: NSTextField!
     var windowDelegate = MainWindowDelegate()
     var idleTimer: Timer!
+    
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        termView.adjustFonts()
+    }
     override func viewDidAppear() {
         super.viewDidAppear()
         self.view.window?.makeFirstResponder(siteAddressField)
