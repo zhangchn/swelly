@@ -35,7 +35,7 @@ func fdZero(_ set: inout fd_set) {
 func fdSet(_ fd: Int32, set: inout fd_set) {
     let intOffset = Int(fd / 32)
     let bitOffset = fd % 32
-    let mask = 1 << bitOffset
+    let mask: __int32_t = 1 << bitOffset
     switch intOffset {
     case 0: set.fds_bits.0 = set.fds_bits.0 | mask
     case 1: set.fds_bits.1 = set.fds_bits.1 | mask
@@ -109,18 +109,19 @@ class PTY {
         var fmt: String!
         if addr.lowercased().hasPrefix("ssh://") {
             ssh = true
-            
-            let idx16 = addr.utf16.startIndex.advanced(by: 6)
-            let idx = String.Index(idx16, within: addr)!
-            addr = addr.substring(from: idx)
+            let idx = addr.index(addr.startIndex, offsetBy: 6)
+            addr = String(addr[idx...]) //.substring(from: idx)
         } else {
             if let range = addr.range(of: "://") {
-                addr = addr.substring(from: range.upperBound)
+                addr = String(addr[range.upperBound...])
+                //addr = addr.substring(from: range.upperBound)
             }
         }
         if let range = addr.range(of: ":") {
-            port = addr.substring(from: range.upperBound)
-            addr = addr.substring(to: range.lowerBound)
+            port = String(addr[range.upperBound...])
+//            port = addr.substring(from: range.upperBound)
+            addr = String(addr[..<range.lowerBound])
+//            addr = addr.substring(to: range.lowerBound)
         }
         if ssh {
             if port == nil {
@@ -132,7 +133,8 @@ class PTY {
                 port = "23"
             }
             if let range = addr.range(of: "@") {
-                addr = addr.substring(from: range.upperBound)
+//                addr = addr.substring(from: range.upperBound)
+                addr = String(addr[range.upperBound...])
             }
             fmt = "/usr/bin/telnet -8 %@ -%@"
         }

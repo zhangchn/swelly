@@ -68,8 +68,8 @@ class ViewController: NSViewController {
 }
 
 class MainWindowDelegate: NSObject, NSWindowDelegate {
-    func windowShouldClose(_ sender: Any) -> Bool {
-        NSApplication.shared().hide(self)
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        NSApplication.shared.hide(self)
         return false
     }
     

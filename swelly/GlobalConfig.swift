@@ -43,14 +43,14 @@ class GlobalConfig {
     var englishFont: CTFont!
     var chineseFont: CTFont!
 
-    var cCTAttribute: [[[String: Any]]] = []
-    var eCTAttribute: [[[String: Any]]] = []
+    var cCTAttribute: [[[NSAttributedStringKey: Any]]] = []
+    var eCTAttribute: [[[NSAttributedStringKey: Any]]] = []
     var colorTable: [[NSColor]]!
     
     var colorBG: NSColor {
         get { return colorTable[0][9] }
         set {
-            colorTable[0][9] = newValue.usingColorSpaceName(NSCalibratedRGBColorSpace)!
+            colorTable[0][9] = newValue.usingColorSpaceName(NSColorSpaceName.calibratedRGB)!
             UserDefaults.standard.set(NSArchiver.archivedData(withRootObject: newValue), forKey: "ColorBG")
 
         }
@@ -105,7 +105,7 @@ class GlobalConfig {
         if cellWidth < 4.0 || cellHeight < 4.0 || chineseFontSize < 4.0 || englishFontSize < 4.0 {
             restoreSettings()
         }
-        if contentSize.width > NSScreen.main()!.frame.width || contentSize.height > NSScreen.main()!.frame.height {
+        if contentSize.width > NSScreen.main!.frame.width || contentSize.height > NSScreen.main!.frame.height {
             restoreSettings()
         }
         let ename = englishFontName as CFString
@@ -117,8 +117,8 @@ class GlobalConfig {
             cCTAttribute.append([])
             eCTAttribute.append([])
             for colorIndex in 0..<numColor {
-                cCTAttribute[table].append([kCTFontAttributeName as String: chineseFont, kCTForegroundColorAttributeName as String: colorTable[table][colorIndex], kCTLigatureAttributeName as String: 0])
-                eCTAttribute[table].append([kCTFontAttributeName as String: englishFont, kCTForegroundColorAttributeName as String: colorTable[table][colorIndex], kCTLigatureAttributeName as String: 0])
+                cCTAttribute[table].append([.font: chineseFont, .foregroundColor : colorTable[table][colorIndex], .ligature: 0])
+                eCTAttribute[table].append([.font: englishFont, .foregroundColor: colorTable[table][colorIndex], .ligature: 0])
             }
         }
     }

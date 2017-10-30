@@ -18,10 +18,10 @@ class Connection : NSObject, PTYDelegate {
     var connected: Bool! {
         didSet {
             if connected! {
-                icon = NSImage(named: "online.pdf")
+                icon = NSImage(named: NSImage.Name("online.pdf"))
             } else {
                 resetMessageCount()
-                icon = NSImage(named: "offline.pdf")
+                icon = NSImage(named: NSImage.Name("offline.pdf"))
             }
         }
     }
@@ -53,7 +53,7 @@ class Connection : NSObject, PTYDelegate {
     func ptyWillConnect(_ pty: PTY) {
         processing = true
         connected = false
-        icon = NSImage(named: "waiting.pdf")
+        icon = NSImage(named: NSImage.Name("waiting.pdf"))
     }
     func ptyDidConnect(_ pty: PTY) {
         processing = false

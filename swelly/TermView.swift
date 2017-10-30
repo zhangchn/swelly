@@ -81,7 +81,7 @@ class TermView: NSView {
     
     func updateBackedImage() {
         backedImage.lockFocus()
-        let context = NSGraphicsContext.current()?.cgContext
+        let context = NSGraphicsContext.current?.cgContext
         if let ds = frontMostTerminal {
             for y in 0 ..< maxRow {
                 var x = 0
@@ -157,7 +157,7 @@ class TermView: NSView {
                     // Modified by K.O.ed: All background color use same alpha setting.
                     let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
                     bgColor.set()
-                    NSRectFill(rect)
+                    rect.fill()
                     /* finish this segment */
                     length = 1
                     lastAttr = currAttr
@@ -194,7 +194,7 @@ class TermView: NSView {
                         let bold = cell.attribute.reverse ? cell.attribute.bold : false
                         let bgColor = config.bgColor(atIndex: Int(bgColorIndex), highlight: bold)
                         bgColor.set()
-                        NSRectFill(NSMakeRect(CGFloat(c) * fontWidth, CGFloat(maxRow - r - 1) * fontHeight, fontWidth, fontHeight))
+                        NSMakeRect(CGFloat(c) * fontWidth, CGFloat(maxRow - r - 1) * fontHeight, fontWidth, fontHeight).fill()
                     }
                 }
             }
@@ -404,8 +404,8 @@ class TermView: NSView {
                             TermView.gLeftImage.lockFocus()
                             config.bgColor(atIndex: Int(bgColor), highlight: bgBoldOfAttribute(cells[index].attribute)).set()
                             let rect = NSRect(origin: NSZeroPoint, size: TermView.gLeftImage.size)
-                            NSRectFill(rect)
-                            if let tempContext = NSGraphicsContext.current()?.cgContext {
+                            rect.fill()
+                            if let tempContext = NSGraphicsContext.current?.cgContext {
                                 tempContext.setShouldSmoothFonts(config.shouldSmoothFonts)
                                 let tempColor = config.color(atIndex: Int(fgColor), highlight: fgBoldOfAttribute(cells[index].attribute))
                                 tempContext.setFont(cgFont)
@@ -495,8 +495,8 @@ class TermView: NSView {
         
         for i in 0..<2 {
             for j in 0..<10 {
-                config.cCTAttribute[i][j][String(kCTFontAttributeName)] = config.chineseFont
-                config.eCTAttribute[i][j][String(kCTFontAttributeName)] = config.englishFont
+                config.cCTAttribute[i][j][.font] = config.chineseFont
+                config.eCTAttribute[i][j][.font] = config.englishFont
             }
         }
         refreshDisplay()
@@ -516,7 +516,7 @@ class TermView: NSView {
             return
         }
         GlobalConfig.sharedInstance.colorBG.set()
-        NSRectFill(bounds)
+        bounds.fill()
         if connected {
             // Draw the backed image
             var imgRect = dirtyRect
@@ -526,7 +526,7 @@ class TermView: NSView {
             drawBlink()
             // Draw the url underline
             NSColor.orange.set()
-            NSBezierPath.setDefaultLineWidth(1.0)
+            NSBezierPath.defaultLineWidth = 1.0
             for r in 0..<maxRow {
                 frontMostTerminal?.withCells(ofRow: r) { (cells) in
                     for var c in 0..<maxColumn {
@@ -543,13 +543,13 @@ class TermView: NSView {
             }
             // Draw the cursor
             NSColor.white.set()
-            NSBezierPath.setDefaultLineWidth(2.0)
+            NSBezierPath.defaultLineWidth = 2.0
             if let ds = frontMostTerminal {
                 NSBezierPath.strokeLine(from: NSPoint(x:CGFloat(ds.cursorColumn) * fontWidth, y: CGFloat(maxRow - ds.cursorRow - 1)*fontHeight + 1), to: NSPoint(x:CGFloat(ds.cursorColumn + 1) * fontWidth, y: CGFloat(maxRow - ds.cursorRow - 1)*fontHeight + 1))
                 x = ds.cursorColumn
                 y = ds.cursorRow
             }
-            NSBezierPath.setDefaultLineWidth(1.0)
+            NSBezierPath.defaultLineWidth = 1.0
          
             if connected && selectionLength != 0 {
                 drawSelection()
@@ -570,7 +570,7 @@ class TermView: NSView {
     override var isOpaque: Bool { get { return true }}
     override var acceptsFirstResponder: Bool { get { return true }}
     override var canBecomeKeyView: Bool { get {return true}}
-    override class func defaultMenu() -> NSMenu? {
+    override class var defaultMenu: NSMenu? {
         return NSMenu()
     }
     override func hitTest(_ point: NSPoint) -> NSView? {
@@ -709,8 +709,8 @@ extension TermView: NSTextInputClient {
         _markedRange.location = 0
         _markedRange.length = attrString.length
         let mAttrString = NSMutableAttributedString(attributedString: attrString)
-        mAttrString.addAttribute(NSFontAttributeName, value: textField.defaultFont, range: NSRange(location: 0, length: attrString.length))
-        mAttrString.addAttribute(NSForegroundColorAttributeName, value: NSColor.white, range: NSRange(location: 0, length: attrString.length))
+        mAttrString.addAttribute(NSAttributedStringKey.font, value: textField.defaultFont, range: NSRange(location: 0, length: attrString.length))
+        mAttrString.addAttribute(NSAttributedStringKey.foregroundColor, value: NSColor.white, range: NSRange(location: 0, length: attrString.length))
         
         textField.string = mAttrString
         textField.selectedRange = selectedRange
@@ -764,7 +764,7 @@ extension TermView: NSTextInputClient {
         return NSAttributedString(string: substring)
     }
     
-    func validAttributesForMarkedText() -> [String] {
+    func validAttributesForMarkedText() -> [NSAttributedStringKey] {
         return []
     }
     
@@ -873,10 +873,10 @@ extension TermView {
             length = 0 - selectionLength
         }
         
-        let pb = NSPasteboard.general()
+        let pb = NSPasteboard.general
         // TODO: ANSIColorPBoardType
-        pb.declareTypes([NSStringPboardType], owner: self)
-        pb.setString(s, forType: NSStringPboardType)
+        pb.declareTypes([.string], owner: self)
+        pb.setString(s, forType: .string)
         
         if hasRectangleSelected {
             // TODO:
@@ -903,18 +903,18 @@ extension TermView {
 
 extension TermView {
     func confirmPaste(sheet: NSWindow, returnCode: Int, contextInfo: UnsafeRawPointer){
-        if returnCode == NSAlertFirstButtonReturn {
+        if returnCode == NSApplication.ModalResponse.alertFirstButtonReturn.rawValue {
             performPaste()
         }
     }
     func confirmPasteWrap( sheet: NSWindow, returnCode: Int, contextInfo: UnsafeRawPointer) {
-        if returnCode == NSAlertFirstButtonReturn {
+        if returnCode == NSApplication.ModalResponse.alertFirstButtonReturn.rawValue {
             performPasteWrap()
         }
     }
     
     func performPaste() {
-        if let str = NSPasteboard.general().string(forType: NSStringPboardType) {
+        if let str = NSPasteboard.general.string(forType: .string) {
             insert(text: str, delay: 0)
         }
     }
@@ -1069,7 +1069,7 @@ extension TermView {
         clearSelection()
         var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
         if let ds = frontMostTerminal {
-            if event.modifierFlags.contains(.control) && !event.modifierFlags.contains(.option) {
+            if event.modifierFlags.contains(NSEvent.ModifierFlags.control) && !event.modifierFlags.contains(NSEvent.ModifierFlags.option) {
                 frontMostConnection?.sendMessage(msg: Data([UInt8(c)]))
                 return
             }
@@ -1129,16 +1129,16 @@ extension TermView {
     
     override func flagsChanged(with event: NSEvent) {
         let currentFlags = event.modifierFlags
-        if currentFlags.contains(.option) {
+        if currentFlags.contains(NSEvent.ModifierFlags.option) {
             // TODO:
 //            wantsRectangleSelection = true
-            NSCursor.crosshair().push()
+            NSCursor.crosshair.push()
 //            _mouseBehaviorDelegate.normalCursor = [NSCursor crosshairCursor];
 
         } else {
             // TODO:
 //            wantsRectangleSelection = false
-            NSCursor.crosshair().pop()
+            NSCursor.crosshair.pop()
 //            _mouseBehaviorDelegate.normalCursor = [NSCursor crosshairCursor];
         }
         // ???

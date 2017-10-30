@@ -242,29 +242,29 @@ class TerminalFeeder {
     }
     func feed(data: Data, connection: Connection) {
         data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
-            #if DEBUG
-            var debugOutput = "feed:"
-            for idx in 0..<data.count {
-                switch bytes[idx] {
-                case 0:
-                    debugOutput += "NUL "
-                case 27:
-                    debugOutput += "ESC "
-                case 10:
-                    debugOutput += "\\n"
-                case 13:
-                    debugOutput += "\\r"
-                case 32..<127:
-                    let u = UnicodeScalar(bytes[idx])
-                    let c = Character(u)
-                    debugOutput += "'\(c)' "
-                default:
-                    debugOutput += "(\(bytes[idx])) "
-                }
-                //debugOutput += "(\(bytes[idx])) "
-            }
-            print(debugOutput)
-            #endif
+//            #if DEBUG
+//            var debugOutput = "feed:"
+//            for idx in 0..<data.count {
+//                switch bytes[idx] {
+//                case 0:
+//                    debugOutput += "NUL "
+//                case 27:
+//                    debugOutput += "ESC "
+//                case 10:
+//                    debugOutput += "\\n"
+//                case 13:
+//                    debugOutput += "\\r"
+//                case 32..<127:
+//                    let u = UnicodeScalar(bytes[idx])
+//                    let c = Character(u)
+//                    debugOutput += "'\(c)' "
+//                default:
+//                    debugOutput += "(\(bytes[idx])) "
+//                }
+//                //debugOutput += "(\(bytes[idx])) "
+//            }
+//            print(debugOutput)
+//            #endif
             feed(bytes: bytes, length: data.count, connection: connection)
         }
     }
@@ -292,7 +292,7 @@ class TerminalFeeder {
                     let d = Data.init(bytes: [ASC_NUL])
                     connection.sendMessage(msg: d)
                 case ASC_BEL:
-                    NSSound(named:"Whit.aiff")?.play()
+                    NSSound(named:NSSound.Name("Whit.aiff"))?.play()
                 case ASC_BS:
                     if cursorX > 0 {
                         cursorX -= 1
