@@ -348,7 +348,7 @@ class TermView: NSView {
                     let attrDict = CTRunGetAttributes(run) as Dictionary
                     let runFont = attrDict[kCTFontAttributeName] as! CTFont
                     let cgFont = CTFontCopyGraphicsFont(runFont, nil)
-                    let runColor = (attrDict[kCTForegroundColorAttributeName] as? NSColor) ?? NSColor.red
+                    let runColor = (attrDict[NSAttributedStringKey.foregroundColor as NSObject] as? NSColor) ?? NSColor.red
                     
                     context.setFont(cgFont)
                     context.setFontSize(CTFontGetSize(runFont))
