@@ -195,7 +195,7 @@ class PTY {
                 print("ioctl failure: erron: \(errno)")
             }
         }
-        slaveName.deallocate(capacity: Int(PATH_MAX))
+        slaveName.deallocate()
         connecting = true
         delegate?.ptyWillConnect(self)
         return true
@@ -306,6 +306,6 @@ class PTY {
                 self.close()
             }
         }
-        buf.deallocate(capacity: 4096)
+        buf.deallocate()
     }
 }
