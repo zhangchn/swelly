@@ -110,18 +110,15 @@ class PTY {
         if addr.lowercased().hasPrefix("ssh://") {
             ssh = true
             let idx = addr.index(addr.startIndex, offsetBy: 6)
-            addr = String(addr[idx...]) //.substring(from: idx)
+            addr = String(addr[idx...])
         } else {
             if let range = addr.range(of: "://") {
                 addr = String(addr[range.upperBound...])
-                //addr = addr.substring(from: range.upperBound)
             }
         }
         if let range = addr.range(of: ":") {
             port = String(addr[range.upperBound...])
-//            port = addr.substring(from: range.upperBound)
             addr = String(addr[..<range.lowerBound])
-//            addr = addr.substring(to: range.lowerBound)
         }
         if ssh {
             if port == nil {
@@ -133,7 +130,6 @@ class PTY {
                 port = "23"
             }
             if let range = addr.range(of: "@") {
-//                addr = addr.substring(from: range.upperBound)
                 addr = String(addr[range.upperBound...])
             }
             fmt = "/usr/bin/telnet -8 %@ -%@"
