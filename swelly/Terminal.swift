@@ -126,7 +126,7 @@ class Terminal {
                     textBuf[bufLen] = " ".utf16.first!
                     bufLen += 1
                 }
-                textBuf[bufLen] = encodeToUnicode(index, from: encoding)
+                textBuf[bufLen] = decode(index, as: encoding)
                 bufLen += 1
                 
                 spaceBuf = 0
