@@ -247,7 +247,7 @@ class TermView: NSView {
                     break
                 case 2:
                     let code = (unichar(cells[x - 1].byte) << 8) + unichar(unichar(cells[x].byte)) - 0x8000
-                    let ch = encodeToUnicode(code, from: frontMostConnection!.site.encoding)
+                    let ch = decode(code, as: frontMostConnection!.site.encoding)
                     // TODO: if isAsciiArtSymbol
                     // else:
                     let isDouble = true
