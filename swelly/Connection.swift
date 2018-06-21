@@ -141,7 +141,7 @@ class Connection : NSObject, PTYDelegate {
                 buf[0] = UInt8(ch)
                 data.append(&buf, count: 1)
             } else {
-                let code = encodeFromUnicode(ch, to: encoding)
+                let code = encode(ch, to: encoding)
                 if code != 0 {
                     buf[0] = UInt8(code >> 8)
                     buf[1] = UInt8(code & 0xff)
