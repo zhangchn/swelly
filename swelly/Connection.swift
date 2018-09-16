@@ -8,6 +8,11 @@
 
 import AppKit
 
+enum ConnectionProtocol {
+    case ssh
+    case telnet
+}
+
 class Connection : NSObject, PTYDelegate {
     var icon: NSImage?
     var processing: Bool = false
@@ -34,6 +39,7 @@ class Connection : NSObject, PTYDelegate {
     var terminalFeeder = TerminalFeeder()
     var pty: PTY?
     var site: Site
+    var userName: String!
     var messageDelegate = MessageDelegate()
     var messageCount: Int = 0
     
@@ -45,7 +51,7 @@ class Connection : NSObject, PTYDelegate {
         if !site.isDummy {
             pty = PTY(proxyAddress: site.proxyAddress, proxyType: site.proxyType)
             pty!.delegate = self
-            _ = pty!.connect(addr: site.address)
+            _ = pty!.connect(addr: site.address, connectionProtocol: site.connectionProtocol, userName: userName)
         }
     }
     
@@ -83,7 +89,7 @@ class Connection : NSObject, PTYDelegate {
     
     func reconnect() {
         pty?.close()
-        _ = pty?.connect(addr: site.address)
+        _ = pty?.connect(addr: site.address, connectionProtocol: site.connectionProtocol, userName: userName)
         resetMessageCount()
     }
     
@@ -98,26 +104,24 @@ class Connection : NSObject, PTYDelegate {
     }
     
     func login() {
-        let addr = site.address
-        let account = addr.utf8
-        if !addr.hasPrefix("ssh") {
-            if let ps = account.split(separator: "@".utf8.first!).last?
-                .split(separator: " ".utf8.first!).last?
-                .split(separator: " ".utf8.first!).last {
-                while terminalFeeder.cursorY <= 3 {
-                    sleep(1)
-                    sendMessage(msg: String(ps)!.data(using: .utf8)!)
-                    sendMessage(msg: Data.init(bytes: [0x0d]))
-                }
+        
+        //let account = addr.utf8
+        switch site.connectionProtocol {
+        case .ssh:
+            if terminalFeeder.cursorX > 2, terminalFeeder.grid[terminalFeeder.cursorY][terminalFeeder.cursorX - 2].byte == "?".utf8.first! {
+                sendMessage(msg: "yes\r".data(using: .ascii)!)
+                sleep(1)
             }
-            
-        } else if terminalFeeder.cursorX > 2, terminalFeeder.grid[terminalFeeder.cursorY][terminalFeeder.cursorX - 2].byte == "?".utf8.first! {
-            sendMessage(msg: "yes\r".data(using: .ascii)!)
-            sleep(1)
+        case .telnet:
+            while terminalFeeder.cursorY <= 3 {
+                sleep(1)
+                sendMessage(msg: userName!.data(using: .utf8)!)
+                sendMessage(msg: Data.init(bytes: [0x0d]))
+            }
         }
         let service = "Welly".data(using: .utf8)
         service?.withUnsafeBytes() { (buffer : UnsafePointer<Int8>) in
-            let accountData = addr.data(using: .utf8)!
+            let accountData = (userName! + "@" + site.address).data(using: .utf8)!
             accountData.withUnsafeBytes() {(buffer2 : UnsafePointer<Int8>) in
                 var len = UInt32(0)
                 var pass : UnsafeMutableRawPointer? = nil
@@ -141,18 +145,24 @@ class Connection : NSObject, PTYDelegate {
                 buf[0] = UInt8(ch)
                 data.append(&buf, count: 1)
             } else {
-                let code = encodeFromUnicode(ch, to: encoding)
-                if code != 0 {
-                    buf[0] = UInt8(code >> 8)
-                    buf[1] = UInt8(code & 0xff)
+                if CFStringIsSurrogateHighCharacter(ch) ||
+                    CFStringIsSurrogateLowCharacter(ch) {
+                    buf[0] = 0x3f
+                    buf[1] = 0x3f
                 } else {
-                    if (ch == 8943 && encoding == .gbk) {
-                        // hard code for the ellipsis
-                        buf[0] = 0xa1
-                        buf[1] = 0xad
-                    } else if ch != 0 {
-                        buf[0] = 0x20
-                        buf[1] = 0x20
+                    let code = encode(ch, to: encoding)
+                    if code != 0 {
+                        buf[0] = UInt8(code >> 8)
+                        buf[1] = UInt8(code & 0xff)
+                    } else {
+                        if (ch == 8943 && encoding == .gbk) {
+                            // hard code for the ellipsis
+                            buf[0] = 0xa1
+                            buf[1] = 0xad
+                        } else if ch != 0 {
+                            buf[0] = 0x20
+                            buf[1] = 0x20
+                        }
                     }
                 }
                 data.append(&buf, count: 2)
