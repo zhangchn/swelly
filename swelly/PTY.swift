@@ -99,6 +99,7 @@ class PTY {
             delegate?.ptyDidClose(self)
         }
     }
+
     class func parse(addr: String) -> String {
         var addr = addr.trimmingCharacters(in: CharacterSet.whitespaces)
         if addr.contains(" ") {
@@ -136,7 +137,7 @@ class PTY {
         }
         return String.init(format: fmt, addr, port!)
     }
-    func connect(addr: String) -> Bool {
+    func connect(addr: String, connectionProtocol: ConnectionProtocol, userName: String!) -> Bool {
         let slaveName = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PATH_MAX))
         let iflag = tcflag_t(bitPattern: Int(ICRNL | IXON | IXANY | IMAXBEL | BRKINT))
         let oflag = tcflag_t(bitPattern: Int(OPOST | ONLCR))
@@ -154,19 +155,37 @@ class PTY {
         let ws_col = GlobalConfig.sharedInstance.column
         let ws_row = GlobalConfig.sharedInstance.row
         var size = winsize(ws_row: UInt16(ws_row), ws_col: UInt16(ws_col), ws_xpixel: 0, ws_ypixel: 0)
-        var arguments = PTY.parse(addr: addr).components(separatedBy: " ")
+        
+
+        //var arguments = PTY.parse(addr: addr).components(separatedBy: " ")
         pid = forkpty(&fd, slaveName, &term, &size)
         if pid < 0 {
             print("Error forking pty: \(errno)")
         } else if pid == 0 {
             // child process
             //kill(0, SIGSTOP)
-            if let b = arguments.first {
-                if b.hasSuffix("ssh") {
-                    if let proxyCommand = Proxy.proxyCommand(address: proxyAddress, type: proxyType) {
-                        arguments.append("-o")
-                        arguments.append(proxyCommand)
+            var arguments: [String]
+            var hostAndPort = addr.split(separator: ":")
+            switch connectionProtocol {
+            case .telnet:
+                if hostAndPort.count == 2, let _ = Int(hostAndPort[1]) {
+                    arguments = ["/usr/bin/telnet", "-8", String(hostAndPort[0]), String(hostAndPort[1])]
+                } else {
+                    arguments = ["/usr/bin/telnet", "-8", String(hostAndPort[0])]
+                }
+            case .ssh:
+                if hostAndPort.count == 2 {
+                    if let _ = Int(hostAndPort[1]) {
+                        arguments = ["ssh", "-o", "Protocol=2,1",  "-p", String(hostAndPort[1]), "-x", userName! + "@" + String(hostAndPort[0])]
+                    } else {
+                        arguments = ["ssh", "-o", "Protocol=2,1",  "-p", "22", "-x", userName! + "@" + String(hostAndPort[0])]
                     }
+                } else {
+                    arguments = ["ssh", "-o", "Protocol=2,1",  "-p", "22", "-x", userName! + "@" + String(hostAndPort[0])]
+                }
+                if let proxyCommand = Proxy.proxyCommand(address: proxyAddress, type: proxyType) {
+                    arguments.append("-o")
+                    arguments.append(proxyCommand)
                 }
             }
             let argv = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: arguments.count + 1)
@@ -195,7 +214,7 @@ class PTY {
                 print("ioctl failure: erron: \(errno)")
             }
         }
-        slaveName.deallocate(capacity: Int(PATH_MAX))
+        slaveName.deallocate()
         connecting = true
         delegate?.ptyWillConnect(self)
         return true
@@ -306,6 +325,6 @@ class PTY {
                 self.close()
             }
         }
-        buf.deallocate(capacity: 4096)
+        buf.deallocate()
     }
 }

@@ -110,7 +110,7 @@ class TermView: NSView {
         backedImage.unlockFocus()
     }
     
-    lazy var backedImage = NSImage(size: GlobalConfig.sharedInstance.contentSize)
+    lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
 
     static var gLeftImage: NSImage!
     func configure() {
@@ -247,7 +247,7 @@ class TermView: NSView {
                     break
                 case 2:
                     let code = (unichar(cells[x - 1].byte) << 8) + unichar(unichar(cells[x].byte)) - 0x8000
-                    let ch = encodeToUnicode(code, from: frontMostConnection!.site.encoding)
+                    let ch = decode(code, as: frontMostConnection!.site.encoding)
                     // TODO: if isAsciiArtSymbol
                     // else:
                     let isDouble = true
@@ -504,6 +504,9 @@ class TermView: NSView {
     
     override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
+        if bounds.width > backedImage.size.width || bounds.height > backedImage.size.height {
+            backedImage = NSImage(size: bounds.size)
+        }
         adjustFonts()
     }
     

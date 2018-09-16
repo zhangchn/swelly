@@ -10,8 +10,10 @@ import Foundation
 
 fileprivate let WLDefaultSiteName = "DefaultSiteName"
 fileprivate let WLDefaultAutoReplyString = "DefaultAutoReplyString"
+
 class Site {
     var isDummy: Bool { get { return address.isEmpty }}
+    var connectionProtocol: ConnectionProtocol = .ssh
     var name = NSLocalizedString(WLDefaultSiteName, comment: "Site")
     var address = ""
     var encoding = GlobalConfig.sharedInstance.defaultEncoding
