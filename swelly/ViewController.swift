@@ -89,15 +89,13 @@ class ViewController: NSViewController {
     
     @IBOutlet var leadingConstraint: NSLayoutConstraint!
     @IBOutlet var trailingConstraint: NSLayoutConstraint!
-    
+    @IBOutlet var aspectConstraint: NSLayoutConstraint!
     func disableConstraintsForFullScreen() {
-        leadingConstraint.isActive = false
-        trailingConstraint.isActive = false
+        aspectConstraint.isActive = false
     }
     
     func enableConstraintsFromFullScreen() {
-        leadingConstraint.isActive = true
-        trailingConstraint.isActive = true
+        aspectConstraint.isActive = true
     }
 }
 

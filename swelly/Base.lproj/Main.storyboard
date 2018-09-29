@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14113"/>
-        <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14313.18"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -667,19 +665,19 @@
             <objects>
                 <viewController title="Swelly" id="XfG-lQ-9wD" customClass="ViewController" customModule="swelly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="960" height="672"/>
+                        <rect key="frame" x="0.0" y="0.0" width="960" height="576"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="d5b-Y4-iCj" customClass="TermView" customModule="swelly" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="960" height="672"/>
+                                <rect key="frame" x="0.0" y="0.0" width="960" height="576"/>
                                 <subviews>
                                     <customView hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hyH-S9-pXA" customClass="MarkedTextView" customModule="swelly" customModuleProvider="target">
-                                        <rect key="frame" x="357" y="366" width="245" height="36"/>
+                                        <rect key="frame" x="357" y="270" width="245" height="36"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     </customView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="width" secondItem="d5b-Y4-iCj" secondAttribute="height" multiplier="1.42857" id="pAJ-m1-2om"/>
+                                    <constraint firstAttribute="width" secondItem="d5b-Y4-iCj" secondAttribute="height" multiplier="1.66667" id="pAJ-m1-2om"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="textField" destination="hyH-S9-pXA" id="fdn-iN-KvK"/>
@@ -687,14 +685,15 @@
                             </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="d5b-Y4-iCj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" priority="500" id="Cgn-Mv-jBl"/>
+                            <constraint firstItem="d5b-Y4-iCj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Cgn-Mv-jBl"/>
                             <constraint firstItem="d5b-Y4-iCj" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="Tys-07-Qhv"/>
-                            <constraint firstAttribute="trailing" secondItem="d5b-Y4-iCj" secondAttribute="trailing" priority="500" id="VDs-Lj-NX7"/>
+                            <constraint firstAttribute="trailing" secondItem="d5b-Y4-iCj" secondAttribute="trailing" id="VDs-Lj-NX7"/>
                             <constraint firstItem="d5b-Y4-iCj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="fQc-72-4QA"/>
                             <constraint firstAttribute="bottom" secondItem="d5b-Y4-iCj" secondAttribute="bottom" id="oHv-7t-MGS"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="aspectConstraint" destination="pAJ-m1-2om" id="DLI-nq-g62"/>
                         <outlet property="leadingConstraint" destination="Cgn-Mv-jBl" id="Wvk-ai-GHD"/>
                         <outlet property="termView" destination="d5b-Y4-iCj" id="UB2-h9-CjP"/>
                         <outlet property="trailingConstraint" destination="VDs-Lj-NX7" id="ccU-bo-j0D"/>
