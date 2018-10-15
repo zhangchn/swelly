@@ -832,6 +832,8 @@ Gw
                     </view>
                     <connections>
                         <outlet property="addressField" destination="nsv-g1-Wda" id="0PE-3E-xhW"/>
+                        <outlet property="cancelButton" destination="qjJ-Og-Dve" id="sXz-vS-9h0"/>
+                        <outlet property="confirmButton" destination="C8O-IR-Hme" id="LGz-AF-XdG"/>
                         <outlet property="connectionTypeControl" destination="5xO-as-deA" id="Viy-jq-KEz"/>
                         <outlet property="userNameField" destination="1wI-to-5Ts" id="LaQ-Zj-McC"/>
                     </connections>

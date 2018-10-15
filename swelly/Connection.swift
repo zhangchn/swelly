@@ -13,6 +13,11 @@ enum ConnectionProtocol {
     case telnet
 }
 
+extension Notification.Name {
+    static let connectionDidConnect = Notification.Name(rawValue: "conn_did_connect")
+    static let connectionDidDisconnect = Notification.Name(rawValue: "conn_did_disconn")
+}
+
 class Connection : NSObject, PTYDelegate {
     var icon: NSImage?
     var processing: Bool = false
@@ -67,6 +72,7 @@ class Connection : NSObject, PTYDelegate {
         Thread.detachNewThread {
             self.login()
         }
+        NotificationCenter.default.post(name: .connectionDidConnect, object: self)
     }
     func pty(_ pty: PTY, didRecv data: Data) {
         terminalFeeder.feed(data: data, connection: self)
@@ -81,6 +87,7 @@ class Connection : NSObject, PTYDelegate {
         connected = false
         terminalFeeder.clearAll()
         terminal.clearAll()
+        NotificationCenter.default.post(name: .connectionDidDisconnect, object: self)
     }
     
     func close() {
