@@ -14,9 +14,13 @@ class ViewController: NSViewController {
     
     @IBOutlet weak var siteAddressField: NSTextField!
     @IBOutlet weak var newConnectionView: NSView!
+    
+    var site : Site = Site()
+
     var windowDelegate = MainWindowDelegate()
     var idleTimer: Timer!
     var reconnectTimer: Timer!
+    weak var currentConnectionViewController : ConnectionViewController?
     override func viewWillAppear() {
         super.viewWillAppear()
         termView.adjustFonts()
@@ -59,23 +63,37 @@ class ViewController: NSViewController {
         }
     }
 
-    @IBAction func didPressConnect(_ sender: Any) {
-        if !termView.connected {
-            let site = Site()
-            site.address = siteAddressField.stringValue
-            let connection = Connection(site: site)
-            connection.setup()
-            let term = Terminal()
-            term.delegate = termView
-            connection.terminal = term
-            termView.connection = connection
-            connectButton.title = "Disconnect"
-            //siteAddressField.isEditable = false
-            
-        } else {
-            termView.connection?.close()
-            //siteAddressField.isEditable = true
-            connectButton.title = "Connect"
+    var connectObserver : AnyObject?
+    var disconnectObserver: AnyObject?
+    func connectTo(site address:String, as user: String, using protoc: ConnectionProtocol) {
+        site.address = address
+        site.connectionProtocol = protoc
+        let connection = Connection(site: site)
+        connection.userName = user
+        connection.setup()
+        let term = Terminal()
+        term.delegate = termView
+        connection.terminal = term
+        termView.connection = connection
+
+        connectObserver = NotificationCenter.default.addObserver(forName: .connectionDidConnect, object: connection, queue: .main) { [weak self] (note) in
+            if let self = self, let connWindow = self.currentConnectionViewController?.view.window {
+                self.view.window?.endSheet(connWindow)
+            }
+        }
+        disconnectObserver = NotificationCenter.default.addObserver(forName: .connectionDidDisconnect, object: connection, queue: .main) { [weak self](note) in
+            if let ob1 = self?.connectObserver {
+                NotificationCenter.default.removeObserver(ob1)
+            }
+            if let ob2 = self?.disconnectObserver {
+                NotificationCenter.default.removeObserver(ob2)
+            }
+            if let vc = self?.currentConnectionViewController {
+                vc.resetUI()
+            } else {
+                let identifier = NSStoryboardSegue.Identifier("login-segue")
+                self?.performSegue(withIdentifier: identifier, sender: self!)
+            }
         }
     }
     
@@ -83,21 +101,20 @@ class ViewController: NSViewController {
         if (segue.identifier?.rawValue ?? "") == "login-segue" {
             if let vc = segue.destinationController as? ConnectionViewController {
                 vc.terminalViewController = self
+                currentConnectionViewController = vc
             }
         }
     }
     
     @IBOutlet var leadingConstraint: NSLayoutConstraint!
     @IBOutlet var trailingConstraint: NSLayoutConstraint!
-    
+    @IBOutlet var aspectConstraint: NSLayoutConstraint!
     func disableConstraintsForFullScreen() {
-        leadingConstraint.isActive = false
-        trailingConstraint.isActive = false
+        aspectConstraint.isActive = false
     }
     
     func enableConstraintsFromFullScreen() {
-        leadingConstraint.isActive = true
-        trailingConstraint.isActive = true
+        aspectConstraint.isActive = true
     }
 }
 
@@ -120,32 +137,23 @@ class MainWindowDelegate: NSObject, NSWindowDelegate {
 }
 
 class ConnectionViewController : NSViewController {
-    var site : Site = Site()
     weak var terminalViewController: ViewController!
     @IBOutlet weak var addressField: NSTextField!
     @IBOutlet weak var userNameField: NSTextField!
     @IBOutlet weak var connectionTypeControl: NSSegmentedControl!
+    @IBOutlet weak var confirmButton: NSButton!
+    @IBOutlet weak var cancelButton: NSButton!
     
     @IBAction func didPressConnect(_ sender: Any) {
-        if let button = sender as? NSButton {
-            button.title = "Connecting..."
-            button.isEnabled = false
-        }
-        site.address = addressField.stringValue
-        switch connectionTypeControl.selectedSegment {
-        case 0:
-            site.connectionProtocol = .telnet
-        default:
-            site.connectionProtocol = .ssh
-        }
-        let connection = Connection(site: site)
-        connection.userName = userNameField.stringValue
-        connection.setup()
-        let term = Terminal()
-        term.delegate = terminalViewController.termView
-        connection.terminal = term
-        terminalViewController.termView.connection = connection
-        terminalViewController.view.window?.endSheet(view.window!)
+        self.confirmButton.title = "Connecting"
+        self.confirmButton.isEnabled = false
+
+        terminalViewController.connectTo(site: addressField.stringValue, as: userNameField.stringValue, using: connectionTypeControl.selectedSegment == 0 ? .telnet : .ssh)
+    }
+    
+    func resetUI() {
+        self.confirmButton.title = "Connect"
+        self.confirmButton.isEnabled = true
     }
     
     @IBAction func didPressCancel(_ sender: Any) {
