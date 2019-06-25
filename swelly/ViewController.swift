@@ -31,7 +31,7 @@ class ViewController: NSViewController {
         self.view.window?.delegate = windowDelegate
         self.view.window?.isReleasedWhenClosed = false
         self.view.window?.backgroundColor = .black
-        let identifier = NSStoryboardSegue.Identifier("login-segue")
+        let identifier = "login-segue"
         if (!self.termView.connected) {
             self.performSegue(withIdentifier: identifier, sender: self)
         }
@@ -91,14 +91,14 @@ class ViewController: NSViewController {
             if let vc = self?.currentConnectionViewController {
                 vc.resetUI()
             } else {
-                let identifier = NSStoryboardSegue.Identifier("login-segue")
+                let identifier = "login-segue"
                 self?.performSegue(withIdentifier: identifier, sender: self!)
             }
         }
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        if (segue.identifier?.rawValue ?? "") == "login-segue" {
+        if (segue.identifier ?? "") == "login-segue" {
             if let vc = segue.destinationController as? ConnectionViewController {
                 vc.terminalViewController = self
                 currentConnectionViewController = vc
