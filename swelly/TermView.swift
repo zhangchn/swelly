@@ -859,7 +859,7 @@ extension TermView {
 
 extension TermView {
     // MARK: Actions
-    @IBAction func copy(_ sender: Any){
+    @IBAction func copy(_ sender: Any?){
         guard connected, selectionLength != 0 else  {
             return
         }
@@ -896,7 +896,7 @@ extension TermView {
         }
     }
     
-    func paste(_ sender: Any) {
+    @IBAction func paste(_ sender: Any?) {
         guard connected else {
             return
         }

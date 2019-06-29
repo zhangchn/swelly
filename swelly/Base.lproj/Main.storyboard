@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14313.18"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -141,12 +141,12 @@
                                         </menuItem>
                                         <menuItem title="Copy" keyEquivalent="c" id="x3v-GG-iWU">
                                             <connections>
-                                                <action selector="copy:" target="Ady-hI-5gd" id="G1f-GL-Joy"/>
+                                                <action selector="copy:" target="Ady-hI-5gd" id="wmr-35-d16"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Paste" keyEquivalent="v" id="gVA-U4-sdL">
                                             <connections>
-                                                <action selector="paste:" target="Ady-hI-5gd" id="UvS-8e-Qdg"/>
+                                                <action selector="paste:" target="Ady-hI-5gd" id="DfE-yD-HLG"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Paste and Match Style" keyEquivalent="V" id="WeT-3V-zwk">
@@ -600,7 +600,7 @@
                                         <menuItem title="Show Sidebar" keyEquivalent="s" id="kIP-vf-haE">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="toggleSourceList:" target="Ady-hI-5gd" id="iwa-gc-5KM"/>
+                                                <action selector="toggleSidebar:" target="Ady-hI-5gd" id="iwa-gc-5KM"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
@@ -733,11 +733,11 @@
             <objects>
                 <viewController id="u8V-dk-deD" customClass="ConnectionViewController" customModule="swelly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="7UT-Qu-ENC">
-                        <rect key="frame" x="0.0" y="0.0" width="582" height="130"/>
+                        <rect key="frame" x="0.0" y="0.0" width="581" height="130"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="900" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GB6-u1-QYa">
-                                <rect key="frame" x="281" y="53" width="21" height="34"/>
+                                <rect key="frame" x="280" y="53" width="21" height="34"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="@" id="VNh-bP-1MI">
                                     <font key="font" size="18" name=".SFNSText"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -745,7 +745,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nsv-g1-Wda">
-                                <rect key="frame" x="306" y="59" width="253" height="22"/>
+                                <rect key="frame" x="305" y="59" width="253" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="253" id="1Vp-D1-iif"/>
                                 </constraints>
@@ -759,7 +759,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1wI-to-5Ts">
-                                <rect key="frame" x="171" y="59" width="104" height="22"/>
+                                <rect key="frame" x="170" y="59" width="104" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="104" id="5qL-eN-hWj"/>
                                 </constraints>
@@ -773,7 +773,7 @@
                                 </textFieldCell>
                             </textField>
                             <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5xO-as-deA">
-                                <rect key="frame" x="35" y="58" width="107" height="23"/>
+                                <rect key="frame" x="35" y="58" width="106" height="23"/>
                                 <segmentedCell key="cell" borderStyle="border" alignment="left" style="capsule" trackingMode="selectOne" id="hqA-cK-Zuc">
                                     <font key="font" metaFont="system"/>
                                     <segments>
@@ -783,7 +783,7 @@
                                 </segmentedCell>
                             </segmentedControl>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C8O-IR-Hme">
-                                <rect key="frame" x="467" y="13" width="92" height="32"/>
+                                <rect key="frame" x="466" y="13" width="92" height="32"/>
                                 <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kcM-13-1D0">
                                     <behavior key="behavior" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -796,7 +796,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qjJ-Og-Dve">
-                                <rect key="frame" x="385" y="13" width="82" height="32"/>
+                                <rect key="frame" x="384" y="13" width="82" height="32"/>
                                 <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="HRd-Ap-C0h">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -844,6 +844,6 @@ Gw
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="Efv-hG-tzk"/>
+        <segue reference="Hr4-uN-eKx"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -125,7 +125,7 @@ class GlobalConfig {
     func restoreSettings() {
         cellWidth = 12
         cellHeight = 24
-        chineseFontName = "STHeiti"
+        chineseFontName = "PingFang"
         englishFontName = "Monaco"
         chineseFontSize = 22 / 24 * cellHeight
         englishFontSize = 18 / 24 * cellHeight
