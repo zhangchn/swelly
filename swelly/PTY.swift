@@ -237,14 +237,14 @@ class PTY {
         
         delegate?.pty(self, willSend: data)
         var length = data.count
-        data.withUnsafeBytes { (bytes: UnsafePointer<Int8>) in
+        data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
             var writefds = fd_set()
             var errorfds = fd_set()
             var timeout = timeval()
             
             
             var chunkSize: Int
-            var msg = UnsafeRawPointer(bytes)
+            var msg = bytes.baseAddress!
             while length > 0 {
 //                bzero(&writefds, MemoryLayout<fd_set>.size)
 //                bzero(&errorfds, MemoryLayout<fd_set>.size)
@@ -270,7 +270,7 @@ class PTY {
                 } else {
                     chunkSize = length
                 }
-                let size = write(fd, bytes, chunkSize)
+                let size = write(fd, bytes.baseAddress!, chunkSize)
                 if size < 0 {
                     break
                 }

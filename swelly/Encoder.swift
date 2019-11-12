@@ -27,8 +27,8 @@ enum Encoding : Int {
 func decode(_ char: UInt16, as encoding: Encoding) -> UTF16Char {
    
     var d = Data.init(count: 2)
-    d.withUnsafeMutableBytes { (buffer: UnsafeMutablePointer<UInt8>) in
-        buffer[0] = UInt8((char & 0xff00) >> 8) + 0x80
+    d.withUnsafeMutableBytes { (buffer: UnsafeMutableRawBufferPointer) in
+        buffer[0] = UInt8((char & 0xff00) >> 8) | 0x80
         buffer[1] = UInt8(char & 0x00ff)
     }
     let s = String(data: d, encoding: encoding.stringEncoding) ?? "？"
@@ -38,7 +38,7 @@ func decode(_ char: UInt16, as encoding: Encoding) -> UTF16Char {
 func encode(_ char: UInt16, to encoding: Encoding) -> UTF16Char {
     var char = char
     let d = String(utf16CodeUnits: &char, count: 1).data(using: encoding.stringEncoding)
-    return d?.withUnsafeBytes({ (buff:UnsafePointer<UTF16Char>) -> UTF16Char in
-        return ((buff[0] & 0xff00) >> 8) | ((buff[0] & 0x00ff) << 8)
-    }) ?? 0
+    return d.map { (d) -> UTF16Char in
+        return UInt16(d[1]) | (UInt16(d[0]) << 8)
+    } ?? 0
 }

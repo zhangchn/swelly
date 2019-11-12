@@ -43,8 +43,8 @@ class GlobalConfig {
     var englishFont: CTFont!
     var chineseFont: CTFont!
 
-    var cCTAttribute: [[[NSAttributedStringKey: Any]]] = []
-    var eCTAttribute: [[[NSAttributedStringKey: Any]]] = []
+    var cCTAttribute: [[[NSAttributedString.Key: Any]]] = []
+    var eCTAttribute: [[[NSAttributedString.Key: Any]]] = []
     var colorTable: [[NSColor]]!
     
     var colorBG: NSColor {
@@ -117,8 +117,8 @@ class GlobalConfig {
             cCTAttribute.append([])
             eCTAttribute.append([])
             for colorIndex in 0..<numColor {
-                cCTAttribute[table].append([.font: chineseFont, .foregroundColor : colorTable[table][colorIndex], .ligature: 0])
-                eCTAttribute[table].append([.font: englishFont, .foregroundColor: colorTable[table][colorIndex], .ligature: 0])
+                cCTAttribute[table].append([.font: chineseFont as Any, .foregroundColor : colorTable[table][colorIndex], .ligature: 0])
+                eCTAttribute[table].append([.font: englishFont as Any, .foregroundColor: colorTable[table][colorIndex], .ligature: 0])
             }
         }
     }

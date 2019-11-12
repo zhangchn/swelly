@@ -241,7 +241,7 @@ class TerminalFeeder {
         terminal?.setAllDirty()
     }
     func feed(data: Data, connection: Connection) {
-        data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
+        data.withUnsafeBytes { (bytes : UnsafeRawBufferPointer) in
 //            #if DEBUG
 //            var debugOutput = "feed:"
 //            for idx in 0..<data.count {
@@ -265,11 +265,11 @@ class TerminalFeeder {
 //            }
 //            print(debugOutput)
 //            #endif
-            feed(bytes: bytes, length: data.count, connection: connection)
+            feed(bytes: bytes, connection: connection)
         }
     }
     
-    func feed(bytes: UnsafePointer<UInt8>, length len: Int, connection: Connection) {
+    func feed(bytes: UnsafeRawBufferPointer, connection: Connection) {
 //        var x: Int
         var peek = false
         if let term = terminal {
@@ -277,6 +277,7 @@ class TerminalFeeder {
                 hasNewMessage = false
             }
         }
+        let len = bytes.count
         for i in 0..<len {
             if peek {
                 peek = false
@@ -289,10 +290,10 @@ class TerminalFeeder {
                 case ASC_NUL, ASC_ETX, ASC_EQT, ASC_ACK, ASC_LS1, ASC_LS0, ASC_DLE, ASC_DC1, ASC_DC2, ASC_DC3, ASC_DC4, ASC_NAK, ASC_SYN, ASC_ETB, ASC_CAN, ASC_SUB, ASC_EM, ASC_FS, ASC_GS, ASC_RS, ASC_US, ASC_DEL:
                     break
                 case ASC_ENQ:
-                    let d = Data.init(bytes: [ASC_NUL])
+                    let d = Data([ASC_NUL])
                     connection.sendMessage(msg: d)
                 case ASC_BEL:
-                    NSSound(named:NSSound.Name("Whit.aiff"))?.play()
+                    NSSound(named:"Whit.aiff")?.play()
                 case ASC_BS:
                     if cursorX > 0 {
                         cursorX -= 1
@@ -683,9 +684,9 @@ class TerminalFeeder {
                         var data : Data
                         switch emustd {
                         case .VT100:
-                            data = Data(bytes: [0x1B, 0x5B, 0x3F, 0x31, 0x3B, 0x30, 0x63])
+                            data = Data([0x1B, 0x5B, 0x3F, 0x31, 0x3B, 0x30, 0x63])
                         case .VT102:
-                            data = Data(bytes: [0x1B, 0x5B, 0x3F, 0x36, 0x63])
+                            data = Data([0x1B, 0x5B, 0x3F, 0x36, 0x63])
                         }
                         if csArg.isEmpty || (csArg.count == 1 && csArg[0] == 0){
                             connection.sendMessage(msg: data)
@@ -865,10 +866,10 @@ class TerminalFeeder {
                             switch f {
                             case 5:
                                 // Report Device OK	<ESC>[0n
-                                connection.sendMessage(msg: Data(bytes:[0x1B, 0x5B, 0x30, CSI_DSR]))
+                                connection.sendMessage(msg: Data([0x1B, 0x5B, 0x30, CSI_DSR]))
                             case 6:	// Report Device OK	<ESC>[y;xR
 
-                                var data = Data(bytes:[0x1B, 0x5B])
+                                var data = Data([0x1B, 0x5B])
                                 if (cursorY + 1) / 10 >= 1 {
                                     data.append(0x30 + UInt8((cursorY + 1)/10))
                                 }

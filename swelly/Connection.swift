@@ -28,10 +28,10 @@ class Connection : NSObject, PTYDelegate {
     var connected: Bool! {
         didSet {
             if connected! {
-                icon = NSImage(named: NSImage.Name("online.pdf"))
+                icon = NSImage(named: "online.pdf")
             } else {
                 resetMessageCount()
-                icon = NSImage(named: NSImage.Name("offline.pdf"))
+                icon = NSImage(named: "offline.pdf")
             }
         }
     }
@@ -64,7 +64,7 @@ class Connection : NSObject, PTYDelegate {
     func ptyWillConnect(_ pty: PTY) {
         processing = true
         connected = false
-        icon = NSImage(named: NSImage.Name("waiting.pdf"))
+        icon = NSImage(named: "waiting.pdf")
     }
     func ptyDidConnect(_ pty: PTY) {
         processing = false
@@ -123,18 +123,20 @@ class Connection : NSObject, PTYDelegate {
             while terminalFeeder.cursorY <= 3 {
                 sleep(1)
                 sendMessage(msg: userName!.data(using: .utf8)!)
-                sendMessage(msg: Data.init(bytes: [0x0d]))
+                sendMessage(msg: Data([0x0d]))
             }
         }
         let service = "Welly".data(using: .utf8)
-        service?.withUnsafeBytes() { (buffer : UnsafePointer<Int8>) in
+        service?.withUnsafeBytes() { (buffer : UnsafeRawBufferPointer) in
             let accountData = (userName! + "@" + site.address).data(using: .utf8)!
-            accountData.withUnsafeBytes() {(buffer2 : UnsafePointer<Int8>) in
+            accountData.withUnsafeBytes() {(buffer2 : UnsafeRawBufferPointer) in
                 var len = UInt32(0)
                 var pass : UnsafeMutableRawPointer? = nil
-                if noErr == SecKeychainFindGenericPassword(nil, UInt32(service!.count), buffer, UInt32(accountData.count), buffer2, &len, &pass, nil) {
-                    sendMessage(msg: Data.init(bytes: pass!, count: Int(len)))
-                    sendMessage(msg: Data.init(bytes: [0x0d]))
+                let serviceNamePtr = buffer.baseAddress!.assumingMemoryBound(to: Int8.self)
+                let accountNamePtr = buffer2.baseAddress!.assumingMemoryBound(to: Int8.self)
+                if noErr == SecKeychainFindGenericPassword(nil, UInt32(service!.count), serviceNamePtr, UInt32(accountData.count), accountNamePtr, &len, &pass, nil) {
+                    sendMessage(msg: Data(bytes: pass!, count: Int(len)))
+                    sendMessage(msg: Data([0x0d]))
                     SecKeychainItemFreeContent(nil, pass)
                 }
             }
