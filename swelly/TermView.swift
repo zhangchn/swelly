@@ -894,6 +894,7 @@ extension TermView {
 //                length:length] 
 //                forType:ANSIColorPBoardType];
         }
+        clearSelection()
     }
     
     @IBAction func paste(_ sender: Any?) {
