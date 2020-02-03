@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="XfG-lQ-9wD">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -733,33 +733,19 @@
             <objects>
                 <viewController id="u8V-dk-deD" customClass="ConnectionViewController" customModule="swelly" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="7UT-Qu-ENC">
-                        <rect key="frame" x="0.0" y="0.0" width="581" height="130"/>
+                        <rect key="frame" x="0.0" y="0.0" width="607" height="129"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="900" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GB6-u1-QYa">
-                                <rect key="frame" x="280" y="53" width="21" height="34"/>
+                            <textField horizontalHuggingPriority="900" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GB6-u1-QYa">
+                                <rect key="frame" x="298" y="58" width="21" height="24"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="@" id="VNh-bP-1MI">
-                                    <font key="font" size="18" name=".SFNSText"/>
+                                    <font key="font" metaFont="system" size="18"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nsv-g1-Wda">
-                                <rect key="frame" x="305" y="59" width="253" height="22"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="253" id="1Vp-D1-iif"/>
-                                </constraints>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" title="bbs.newsmth.net" placeholderString="site" drawsBackground="YES" id="GYs-36-iPk">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <allowedInputSourceLocales>
-                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
-                                    </allowedInputSourceLocales>
-                                </textFieldCell>
-                            </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1wI-to-5Ts">
-                                <rect key="frame" x="170" y="59" width="104" height="22"/>
+                            <textField verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1wI-to-5Ts">
+                                <rect key="frame" x="186" y="59" width="104" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="104" id="5qL-eN-hWj"/>
                                 </constraints>
@@ -772,18 +758,18 @@
                                     </allowedInputSourceLocales>
                                 </textFieldCell>
                             </textField>
-                            <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5xO-as-deA">
-                                <rect key="frame" x="35" y="58" width="106" height="23"/>
+                            <segmentedControl verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5xO-as-deA">
+                                <rect key="frame" x="35" y="58" width="122" height="23"/>
                                 <segmentedCell key="cell" borderStyle="border" alignment="left" style="capsule" trackingMode="selectOne" id="hqA-cK-Zuc">
                                     <font key="font" metaFont="system"/>
                                     <segments>
-                                        <segment label="telnet" width="53"/>
+                                        <segment label="telnet" width="63"/>
                                         <segment label="ssh" width="52" selected="YES" tag="1"/>
                                     </segments>
                                 </segmentedCell>
                             </segmentedControl>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="C8O-IR-Hme">
-                                <rect key="frame" x="466" y="13" width="92" height="32"/>
+                                <rect key="frame" x="456" y="13" width="92" height="32"/>
                                 <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kcM-13-1D0">
                                     <behavior key="behavior" lightByContents="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -796,7 +782,7 @@ DQ
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qjJ-Og-Dve">
-                                <rect key="frame" x="384" y="13" width="82" height="32"/>
+                                <rect key="frame" x="374" y="13" width="82" height="32"/>
                                 <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="HRd-Ap-C0h">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -814,24 +800,17 @@ Gw
                             <constraint firstItem="5xO-as-deA" firstAttribute="centerY" secondItem="1wI-to-5Ts" secondAttribute="centerY" id="971-SD-jkU"/>
                             <constraint firstItem="5xO-as-deA" firstAttribute="leading" secondItem="7UT-Qu-ENC" secondAttribute="leading" constant="35" id="BA6-o5-VnH"/>
                             <constraint firstItem="1wI-to-5Ts" firstAttribute="leading" secondItem="5xO-as-deA" secondAttribute="trailing" constant="29" id="Kst-MV-H0q"/>
-                            <constraint firstAttribute="trailing" secondItem="nsv-g1-Wda" secondAttribute="trailing" constant="23" id="Kvz-Ee-CFo"/>
                             <constraint firstAttribute="bottom" secondItem="C8O-IR-Hme" secondAttribute="bottom" constant="20" id="Ml7-9N-3TD"/>
                             <constraint firstItem="5xO-as-deA" firstAttribute="centerY" secondItem="GB6-u1-QYa" secondAttribute="centerY" id="OtF-cl-nle"/>
-                            <constraint firstAttribute="trailing" secondItem="C8O-IR-Hme" secondAttribute="trailing" constant="29" id="Vj2-kA-GKS"/>
+                            <constraint firstAttribute="trailing" secondItem="C8O-IR-Hme" secondAttribute="trailing" constant="65" id="Vj2-kA-GKS"/>
                             <constraint firstItem="5xO-as-deA" firstAttribute="top" secondItem="1wI-to-5Ts" secondAttribute="top" id="cj0-ra-N3E"/>
                             <constraint firstItem="C8O-IR-Hme" firstAttribute="leading" secondItem="qjJ-Og-Dve" secondAttribute="trailing" constant="12" symbolic="YES" id="f6V-pU-z3M"/>
-                            <constraint firstItem="GB6-u1-QYa" firstAttribute="centerX" secondItem="7UT-Qu-ENC" secondAttribute="centerX" id="qf7-5U-Yrh"/>
+                            <constraint firstItem="GB6-u1-QYa" firstAttribute="centerX" secondItem="7UT-Qu-ENC" secondAttribute="centerX" constant="5" id="qf7-5U-Yrh"/>
                             <constraint firstItem="GB6-u1-QYa" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="1wI-to-5Ts" secondAttribute="trailing" constant="8" symbolic="YES" id="sM6-9t-CeG"/>
-                            <constraint firstItem="nsv-g1-Wda" firstAttribute="baseline" secondItem="GB6-u1-QYa" secondAttribute="firstBaseline" id="sVf-LC-qgp"/>
                             <constraint firstItem="qjJ-Og-Dve" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7UT-Qu-ENC" secondAttribute="leading" constant="20" symbolic="YES" id="tZL-5C-cR1"/>
-                            <constraint firstItem="nsv-g1-Wda" firstAttribute="leading" secondItem="GB6-u1-QYa" secondAttribute="trailing" constant="6" id="tgg-tN-SxK"/>
-                            <constraint firstItem="C8O-IR-Hme" firstAttribute="top" secondItem="nsv-g1-Wda" secondAttribute="bottom" constant="18" id="vIL-BN-ELN"/>
-                            <constraint firstItem="nsv-g1-Wda" firstAttribute="top" secondItem="7UT-Qu-ENC" secondAttribute="top" constant="49" id="vhx-fq-p96"/>
-                            <constraint firstItem="5xO-as-deA" firstAttribute="bottom" secondItem="nsv-g1-Wda" secondAttribute="bottom" id="yOM-d8-IZR"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="addressField" destination="nsv-g1-Wda" id="0PE-3E-xhW"/>
                         <outlet property="cancelButton" destination="qjJ-Og-Dve" id="sXz-vS-9h0"/>
                         <outlet property="confirmButton" destination="C8O-IR-Hme" id="LGz-AF-XdG"/>
                         <outlet property="connectionTypeControl" destination="5xO-as-deA" id="Viy-jq-KEz"/>
@@ -840,7 +819,7 @@ Gw
                 </viewController>
                 <customObject id="7cT-eO-k4B" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="988" y="1148"/>
+            <point key="canvasLocation" x="1001.5" y="1147.5"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
