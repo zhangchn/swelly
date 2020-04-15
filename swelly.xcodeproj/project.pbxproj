@@ -37,6 +37,9 @@
 		DB4382561DA49BB900F0FCE3 /* Connection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
 		DB4382581DA49C3B00F0FCE3 /* Site.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Site.swift; sourceTree = "<group>"; };
 		DB43825B1DA49D4900F0FCE3 /* Encoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
+		DB6467B4243C45FD00A88253 /* libswiftDarwin.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftDarwin.tbd; path = usr/lib/swift/libswiftDarwin.tbd; sourceTree = SDKROOT; };
+		DB6467B7243C462700A88253 /* libsystem_darwin.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsystem_darwin.tbd; path = usr/lib/system/libsystem_darwin.tbd; sourceTree = SDKROOT; };
+		DB6467B9243C46C800A88253 /* libSystem.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libSystem.tbd; path = usr/lib/libSystem.tbd; sourceTree = SDKROOT; };
 		DB76069C1E49C2B500F5D7C8 /* MarkedTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkedTextView.swift; sourceTree = "<group>"; };
 		DBC2D19C1DA4A72700B7EED7 /* GlobalConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConfig.swift; sourceTree = "<group>"; };
 		DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
@@ -64,6 +67,7 @@
 			children = (
 				DB4382451DA49B7F00F0FCE3 /* swelly */,
 				DB4382441DA49B7F00F0FCE3 /* Products */,
+				DB6467B3243C45FD00A88253 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,6 +115,16 @@
 				DBC2D19E1DA4A80100B7EED7 /* CommonTypes.swift */,
 			);
 			name = "Constants & Utilities";
+			sourceTree = "<group>";
+		};
+		DB6467B3243C45FD00A88253 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DB6467B9243C46C800A88253 /* libSystem.tbd */,
+				DB6467B7243C462700A88253 /* libsystem_darwin.tbd */,
+				DB6467B4243C45FD00A88253 /* libswiftDarwin.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		DBC2D1A61DA4E9D000B7EED7 /* Message */ = {
@@ -361,6 +375,11 @@
 				DEVELOPMENT_TEAM = 45474498ZK;
 				INFOPLIST_FILE = swelly/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/usr/lib/system",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tgfbeta.swelly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -375,6 +394,11 @@
 				DEVELOPMENT_TEAM = 45474498ZK;
 				INFOPLIST_FILE = swelly/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/usr/lib/system",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tgfbeta.swelly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

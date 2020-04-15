@@ -144,10 +144,16 @@ class ConnectionViewController : NSViewController {
     @IBOutlet weak var confirmButton: NSButton!
     @IBOutlet weak var cancelButton: NSButton!
     
+    override func viewDidLoad() {
+        self.userNameField.stringValue = (NSApp.delegate as! AppDelegate).username ?? ""
+        self.addressField.stringValue = (NSApp.delegate as! AppDelegate).site ?? ""
+    }
     @IBAction func didPressConnect(_ sender: Any) {
         self.confirmButton.title = "Connecting"
         self.confirmButton.isEnabled = false
 
+        (NSApp.delegate as! AppDelegate).username = self.userNameField.stringValue
+        (NSApp.delegate as! AppDelegate).site = self.addressField.stringValue
         terminalViewController.connectTo(site: addressField.stringValue, as: userNameField.stringValue, using: connectionTypeControl.selectedSegment == 0 ? .telnet : .ssh)
     }
     
