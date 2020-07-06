@@ -18,134 +18,135 @@ enum State {
     case TP_CONTROL
     case TP_SCS
 }
-
-let ASC_NUL : UInt8 = 0x00 // NULL
-let ASC_SOH : UInt8 = 0x01 // START OF HEADING
-let ASC_STX : UInt8 = 0x02 // START OF TEXT
-let ASC_ETX : UInt8 = 0x03 // END OF TEXT
-let ASC_EQT : UInt8 = 0x04 // END OF TRANSMISSION
-let ASC_ENQ : UInt8 = 0x05 // ^E, ENQUIRE
-let ASC_ACK : UInt8 = 0x06 // ACKNOWLEDGE
-let ASC_BEL : UInt8 = 0x07 // ^G, BELL (BEEP)
-let ASC_BS : UInt8 = 0x08 // ^H, BACKSPACE
-let ASC_HT : UInt8 = 0x09 // ^I, HORIZONTAL TABULATION
-let ASC_LF : UInt8 = 0x0A // ^J, LINE FEED
-let ASC_VT : UInt8 = 0x0B // ^K, Virtical Tabulation
-let ASC_FF : UInt8 = 0x0C // ^L, Form Feed
-let ASC_CR : UInt8 = 0x0D // ^M, Carriage Return
-let ASC_LS1 : UInt8 = 0x0E // Shift Out
-let ASC_LS0 : UInt8 = 0x0F // ^O, Shift In
-let ASC_DLE : UInt8 = 0x10 // Data Link Escape, normally MODEM
-let ASC_DC1 : UInt8 = 0x11 // Device Control One, XON
-let ASC_DC2 : UInt8 = 0x12 // Device Control Two
-let ASC_DC3 : UInt8 = 0x13 // Device Control Three, XOFF
-let ASC_DC4 : UInt8 = 0x14 // Device Control Four
-let ASC_NAK : UInt8 = 0x15 // Negative Acknowledge
-let ASC_SYN : UInt8 = 0x16 // Synchronous Idle
-let ASC_ETB : UInt8 = 0x17 // End of Transmission Block
-let ASC_CAN : UInt8 = 0x18 // Cancel
-let ASC_EM : UInt8 = 0x19 // End of Medium
-let ASC_SUB : UInt8 = 0x1A // Substitute
-let ASC_ESC : UInt8 = 0x1B // Escape
-let ASC_FS : UInt8 = 0x1C // File Separator
-let ASC_GS : UInt8 = 0x1D // Group Separator
-let ASC_RS : UInt8 = 0x1E // Record Separator
-let ASC_US : UInt8 = 0x1F // Unit Separator
-let ASC_DEL : UInt8 = 0x7F // Delete, Ignored on input; not stored in buffer.
-
-// Escape Sequence
-let ESC_HASH : UInt8 = 0x23 // #, Several DEC modes..
-let ESC_sG0 : UInt8 = 0x28 // (, Font Set G0
-let ESC_sG1 : UInt8 = 0x29 // ), Font Set G1
-let ESC_APPK : UInt8 = 0x3D // =, Appl. keypad
-let ESC_NUMK : UInt8 = 0x3E // >, Numeric keypad
-let ESC_DECSC : UInt8 = 0x37 // 7,
-let ESC_DECRC : UInt8 = 0x38 // 8,
-let ESC_BPH : UInt8 = 0x42 // B,
-let ESC_NBH : UInt8 = 0x43 // C,
-let ESC_IND : UInt8 = 0x44 // D, Index
-let ESC_NEL : UInt8 = 0x45 // E, Next Line
-let ESC_SSA : UInt8 = 0x46 // F,
-let ESC_ESA : UInt8 = 0x47 // G,
-let ESC_HTS : UInt8 = 0x48 // H, Tab Set
-let ESC_HTJ : UInt8 = 0x49 // I,
-let ESC_VTS : UInt8 = 0x4A // J,
-let ESC_PLD : UInt8 = 0x4B // K,
-let ESC_PLU : UInt8 = 0x4C // L,
-let ESC_RI : UInt8 = 0x4D // M, Reverse Index
-let ESC_SS2 : UInt8 = 0x4E // N, Single Shift Select of G2 Character Set
-let ESC_SS3 : UInt8 = 0x4F // O, Single Shift Select of G3 Character Set
-let ESC_DCS : UInt8 = 0x50 // P, Device Control String
-let ESC_PU1 : UInt8 = 0x51 // Q,
-let ESC_PU2 : UInt8 = 0x52 // R,
-let ESC_STS : UInt8 = 0x53 // S,
-let ESC_CCH : UInt8 = 0x54 // T,
-let ESC_MW : UInt8 = 0x55 // U,
-let ESC_SPA : UInt8 = 0x56 // V, Start of Guarded Area
-let ESC_EPA : UInt8 = 0x57 // W, End of Guarded Area
-let ESC_SOS : UInt8 = 0x58 // X, Start of String
-//#define ESC_      0x59 // Y,
-let ESC_SCI : UInt8 = 0x5A // Z, Return Terminal ID
-let ESC_CSI : UInt8 = 0x5B // [, Control Sequence Introducer
-let ESC_ST : UInt8 = 0x5C // \, String Terminator
-let ESC_OSC : UInt8 = 0x5D // ], Operating System Command
-let ESC_PM : UInt8 = 0x5E // ^, Privacy Message
-let ESC_APC : UInt8 = 0x5F // _, Application Program Command
-let ESC_RIS : UInt8 = 0x63 // c, RIS reset
-
-// Control sequences
-let CSI_ICH : UInt8 = 0x40 // INSERT CHARACTER, requires DCSM implementation
-let CSI_CUU : UInt8 = 0x41 // A, CURSOR UP
-let CSI_CUD : UInt8 = 0x42 // B, CURSOR DOWN
-let CSI_CUF : UInt8 = 0x43 // C, CURSOR FORWARD
-let CSI_CUB : UInt8 = 0x44 // D, CURSOR BACKWARD
-let CSI_CNL : UInt8 = 0x45 // E, CURSOR NEXT LINE
-let CSI_CPL : UInt8 = 0x46 // F, CURSOR PRECEDING LINE
-let CSI_CHA : UInt8 = 0x47 // G, CURSOR CHARACTER ABSOLUTE
-let CSI_CUP : UInt8 = 0x48 // H, CURSOR POSITION
-let CSI_CHT : UInt8 = 0x49 // I, CURSOR FORWARD TABULATION
-let CSI_ED : UInt8 = 0x4A // J, ERASE IN PAGE
-let CSI_EL : UInt8 = 0x4B // K, ERASE IN LINE
-let CSI_IL : UInt8 = 0x4C // L, INSERT LINE
-let CSI_DL : UInt8 = 0x4D // M, DELETE LINE
-let CSI_EF : UInt8 = 0x4E // N, Erase in Field, not implemented
-let CSI_EA : UInt8 = 0x4F // O, Erase in Area, not implemented
-let CSI_DCH : UInt8 = 0x50 // P, DELETE CHARACTER
-let CSI_SSE : UInt8 = 0x51 // Q, ?
-let CSI_CPR : UInt8 = 0x52 // R, ACTIVE POSITION REPORT, this is for responding
-let CSI_SU : UInt8 = 0x53 // S, ?
-let CSI_SD : UInt8 = 0x54 // T, ?
-let CSI_NP : UInt8 = 0x55 // U, ?
-let CSI_PP : UInt8 = 0x56 // V, ?
-let CSI_CTC : UInt8 = 0x57 // W, CURSOR TABULATION CONTROL, not implemented
-let CSI_ECH : UInt8 = 0x58 // X, ERASE CHARACTER
-let CSI_CVT : UInt8 = 0x59 // Y, CURSOR LINE TABULATION, not implemented
-let CSI_CBT : UInt8 = 0x5A // Z, CURSOR BACKWARD TABULATION, not implemented
-let CSI_SRS : UInt8 = 0x5B // [, ?
-let CSI_PTX : UInt8 = 0x5C // \, ?
-let CSI_SDS : UInt8 = 0x5D // ], ?
-//#define CSISIMD     0x5E // ^, ?
-let CSI_HPA : UInt8 = 0x60 // _, CHARACTER POSITION ABSOLUTE
-let CSI_HPR : UInt8 = 0x61 // a, CHARACTER POSITION FORWARD
-let CSI_REP : UInt8 = 0x62 // b, REPEAT, not implemented
-let CSI_DA : UInt8 = 0x63 // c, DEVICE ATTRIBUTES
-let CSI_VPA : UInt8 = 0x64 // d, LINE POSITION ABSOLUTE
-let CSI_VPR : UInt8 = 0x65 // e, LINE POSITION FORWARD
-let CSI_HVP : UInt8 = 0x66 // f, CHARACTER AND LINE POSITION
-let CSI_TBC : UInt8 = 0x67 // g, TABULATION CLEAR, not implemented, ignored
-let CSI_SM : UInt8 = 0x68 // h, Set Mode, not implemented, ignored
-let CSI_MC : UInt8 = 0x69 // i, MEDIA COPY, not implemented, ignored
-let CSI_HPB : UInt8 = 0x6A // j, CHARACTER POSITION BACKWARD
-let CSI_VPB : UInt8 = 0x6B // k, LINE POSITION BACKWARD
-let CSI_RM : UInt8 = 0x6C // l, Reset Mode. not implemented, ignored
-let CSI_SGR : UInt8 = 0x6D // m, SELECT GRAPHIC RENDITION
-let CSI_DSR : UInt8 = 0x6E // n, DEVICE STATUS REPORT
-let CSI_DAQ : UInt8 = 0x6F // o, DEFINE AREA QUALIFICATION, not implemented
-let CSI_DFNKY : UInt8 = 0x70 // p, shouldn't be implemented
-//0x71 // q,
-let CSI_DECSTBM : UInt8 = 0x72 // r, Set Top and Bottom Margins
-let CSI_SCP : UInt8 = 0x73 // s, Saves the cursor position.
-let CSI_RCP : UInt8 = 0x75 // u, Restores the cursor position.
+extension UInt8 {
+    static let ASC_NUL : UInt8 = 0x00 // NULL
+    static let ASC_SOH : UInt8 = 0x01 // START OF HEADING
+    static let ASC_STX : UInt8 = 0x02 // START OF TEXT
+    static let ASC_ETX : UInt8 = 0x03 // END OF TEXT
+    static let ASC_EQT : UInt8 = 0x04 // END OF TRANSMISSION
+    static let ASC_ENQ : UInt8 = 0x05 // ^E, ENQUIRE
+    static let ASC_ACK : UInt8 = 0x06 // ACKNOWLEDGE
+    static let ASC_BEL : UInt8 = 0x07 // ^G, BELL (BEEP)
+    static let ASC_BS : UInt8 = 0x08 // ^H, BACKSPACE
+    static let ASC_HT : UInt8 = 0x09 // ^I, HORIZONTAL TABULATION
+    static let ASC_LF : UInt8 = 0x0A // ^J, LINE FEED
+    static let ASC_VT : UInt8 = 0x0B // ^K, Virtical Tabulation
+    static let ASC_FF : UInt8 = 0x0C // ^L, Form Feed
+    static let ASC_CR : UInt8 = 0x0D // ^M, Carriage Return
+    static let ASC_LS1 : UInt8 = 0x0E // Shift Out
+    static let ASC_LS0 : UInt8 = 0x0F // ^O, Shift In
+    static let ASC_DLE : UInt8 = 0x10 // Data Link Escape, normally MODEM
+    static let ASC_DC1 : UInt8 = 0x11 // Device Control One, XON
+    static let ASC_DC2 : UInt8 = 0x12 // Device Control Two
+    static let ASC_DC3 : UInt8 = 0x13 // Device Control Three, XOFF
+    static let ASC_DC4 : UInt8 = 0x14 // Device Control Four
+    static let ASC_NAK : UInt8 = 0x15 // Negative Acknowledge
+    static let ASC_SYN : UInt8 = 0x16 // Synchronous Idle
+    static let ASC_ETB : UInt8 = 0x17 // End of Transmission Block
+    static let ASC_CAN : UInt8 = 0x18 // Cancel
+    static let ASC_EM : UInt8 = 0x19 // End of Medium
+    static let ASC_SUB : UInt8 = 0x1A // Substitute
+    static let ASC_ESC : UInt8 = 0x1B // Escape
+    static let ASC_FS : UInt8 = 0x1C // File Separator
+    static let ASC_GS : UInt8 = 0x1D // Group Separator
+    static let ASC_RS : UInt8 = 0x1E // Record Separator
+    static let ASC_US : UInt8 = 0x1F // Unit Separator
+    static let ASC_DEL : UInt8 = 0x7F // Delete, Ignored on input; not stored in buffer.
+    
+    // Escape Sequence
+    static let ESC_HASH : UInt8 = 0x23 // #, Several DEC modes..
+    static let ESC_sG0 : UInt8 = 0x28 // (, Font Set G0
+    static let ESC_sG1 : UInt8 = 0x29 // ), Font Set G1
+    static let ESC_APPK : UInt8 = 0x3D // =, Appl. keypad
+    static let ESC_NUMK : UInt8 = 0x3E // >, Numeric keypad
+    static let ESC_DECSC : UInt8 = 0x37 // 7,
+    static let ESC_DECRC : UInt8 = 0x38 // 8,
+    static let ESC_BPH : UInt8 = 0x42 // B,
+    static let ESC_NBH : UInt8 = 0x43 // C,
+    static let ESC_IND : UInt8 = 0x44 // D, Index
+    static let ESC_NEL : UInt8 = 0x45 // E, Next Line
+    static let ESC_SSA : UInt8 = 0x46 // F,
+    static let ESC_ESA : UInt8 = 0x47 // G,
+    static let ESC_HTS : UInt8 = 0x48 // H, Tab Set
+    static let ESC_HTJ : UInt8 = 0x49 // I,
+    static let ESC_VTS : UInt8 = 0x4A // J,
+    static let ESC_PLD : UInt8 = 0x4B // K,
+    static let ESC_PLU : UInt8 = 0x4C // L,
+    static let ESC_RI : UInt8 = 0x4D // M, Reverse Index
+    static let ESC_SS2 : UInt8 = 0x4E // N, Single Shift Select of G2 Character Set
+    static let ESC_SS3 : UInt8 = 0x4F // O, Single Shift Select of G3 Character Set
+    static let ESC_DCS : UInt8 = 0x50 // P, Device Control String
+    static let ESC_PU1 : UInt8 = 0x51 // Q,
+    static let ESC_PU2 : UInt8 = 0x52 // R,
+    static let ESC_STS : UInt8 = 0x53 // S,
+    static let ESC_CCH : UInt8 = 0x54 // T,
+    static let ESC_MW : UInt8 = 0x55 // U,
+    static let ESC_SPA : UInt8 = 0x56 // V, Start of Guarded Area
+    static let ESC_EPA : UInt8 = 0x57 // W, End of Guarded Area
+    static let ESC_SOS : UInt8 = 0x58 // X, Start of String
+    //#define ESC_      0x59 // Y,
+    static let ESC_SCI : UInt8 = 0x5A // Z, Return Terminal ID
+    static let ESC_CSI : UInt8 = 0x5B // [, Control Sequence Introducer
+    static let ESC_ST : UInt8 = 0x5C // \, String Terminator
+    static let ESC_OSC : UInt8 = 0x5D // ], Operating System Command
+    static let ESC_PM : UInt8 = 0x5E // ^, Privacy Message
+    static let ESC_APC : UInt8 = 0x5F // _, Application Program Command
+    static let ESC_RIS : UInt8 = 0x63 // c, RIS reset
+    
+    // Control sequences
+    static let CSI_ICH : UInt8 = 0x40 // INSERT CHARACTER, requires DCSM implementation
+    static let CSI_CUU : UInt8 = 0x41 // A, CURSOR UP
+    static let CSI_CUD : UInt8 = 0x42 // B, CURSOR DOWN
+    static let CSI_CUF : UInt8 = 0x43 // C, CURSOR FORWARD
+    static let CSI_CUB : UInt8 = 0x44 // D, CURSOR BACKWARD
+    static let CSI_CNL : UInt8 = 0x45 // E, CURSOR NEXT LINE
+    static let CSI_CPL : UInt8 = 0x46 // F, CURSOR PRECEDING LINE
+    static let CSI_CHA : UInt8 = 0x47 // G, CURSOR CHARACTER ABSOLUTE
+    static let CSI_CUP : UInt8 = 0x48 // H, CURSOR POSITION
+    static let CSI_CHT : UInt8 = 0x49 // I, CURSOR FORWARD TABULATION
+    static let CSI_ED : UInt8 = 0x4A // J, ERASE IN PAGE
+    static let CSI_EL : UInt8 = 0x4B // K, ERASE IN LINE
+    static let CSI_IL : UInt8 = 0x4C // L, INSERT LINE
+    static let CSI_DL : UInt8 = 0x4D // M, DELETE LINE
+    static let CSI_EF : UInt8 = 0x4E // N, Erase in Field, not implemented
+    static let CSI_EA : UInt8 = 0x4F // O, Erase in Area, not implemented
+    static let CSI_DCH : UInt8 = 0x50 // P, DELETE CHARACTER
+    static let CSI_SSE : UInt8 = 0x51 // Q, ?
+    static let CSI_CPR : UInt8 = 0x52 // R, ACTIVE POSITION REPORT, this is for responding
+    static let CSI_SU : UInt8 = 0x53 // S, ?
+    static let CSI_SD : UInt8 = 0x54 // T, ?
+    static let CSI_NP : UInt8 = 0x55 // U, ?
+    static let CSI_PP : UInt8 = 0x56 // V, ?
+    static let CSI_CTC : UInt8 = 0x57 // W, CURSOR TABULATION CONTROL, not implemented
+    static let CSI_ECH : UInt8 = 0x58 // X, ERASE CHARACTER
+    static let CSI_CVT : UInt8 = 0x59 // Y, CURSOR LINE TABULATION, not implemented
+    static let CSI_CBT : UInt8 = 0x5A // Z, CURSOR BACKWARD TABULATION, not implemented
+    static let CSI_SRS : UInt8 = 0x5B // [, ?
+    static let CSI_PTX : UInt8 = 0x5C // \, ?
+    static let CSI_SDS : UInt8 = 0x5D // ], ?
+    //#define CSISIMD     0x5E // ^, ?
+    static let CSI_HPA : UInt8 = 0x60 // _, CHARACTER POSITION ABSOLUTE
+    static let CSI_HPR : UInt8 = 0x61 // a, CHARACTER POSITION FORWARD
+    static let CSI_REP : UInt8 = 0x62 // b, REPEAT, not implemented
+    static let CSI_DA : UInt8 = 0x63 // c, DEVICE ATTRIBUTES
+    static let CSI_VPA : UInt8 = 0x64 // d, LINE POSITION ABSOLUTE
+    static let CSI_VPR : UInt8 = 0x65 // e, LINE POSITION FORWARD
+    static let CSI_HVP : UInt8 = 0x66 // f, CHARACTER AND LINE POSITION
+    static let CSI_TBC : UInt8 = 0x67 // g, TABULATION CLEAR, not implemented, ignored
+    static let CSI_SM : UInt8 = 0x68 // h, Set Mode, not implemented, ignored
+    static let CSI_MC : UInt8 = 0x69 // i, MEDIA COPY, not implemented, ignored
+    static let CSI_HPB : UInt8 = 0x6A // j, CHARACTER POSITION BACKWARD
+    static let CSI_VPB : UInt8 = 0x6B // k, LINE POSITION BACKWARD
+    static let CSI_RM : UInt8 = 0x6C // l, Reset Mode. not implemented, ignored
+    static let CSI_SGR : UInt8 = 0x6D // m, SELECT GRAPHIC RENDITION
+    static let CSI_DSR : UInt8 = 0x6E // n, DEVICE STATUS REPORT
+    static let CSI_DAQ : UInt8 = 0x6F // o, DEFINE AREA QUALIFICATION, not implemented
+    static let CSI_DFNKY : UInt8 = 0x70 // p, shouldn't be implemented
+    //0x71 // q,
+    static let CSI_DECSTBM : UInt8 = 0x72 // r, Set Top and Bottom Margins
+    static let CSI_SCP : UInt8 = 0x73 // s, Saves the cursor position.
+    static let CSI_RCP : UInt8 = 0x75 // u, Restores the cursor position.
+}
 
 func isParameter(c: UInt8) -> Bool { return (c >= 0x30 && c <= 0x3F) }
 
@@ -287,20 +288,20 @@ class TerminalFeeder {
             switch state {
             case .TP_NORMAL:
                 switch c {
-                case ASC_NUL, ASC_ETX, ASC_EQT, ASC_ACK, ASC_LS1, ASC_LS0, ASC_DLE, ASC_DC1, ASC_DC2, ASC_DC3, ASC_DC4, ASC_NAK, ASC_SYN, ASC_ETB, ASC_CAN, ASC_SUB, ASC_EM, ASC_FS, ASC_GS, ASC_RS, ASC_US, ASC_DEL:
+                case .ASC_NUL, .ASC_ETX, .ASC_EQT, .ASC_ACK, .ASC_LS1, .ASC_LS0, .ASC_DLE, .ASC_DC1, .ASC_DC2, .ASC_DC3, .ASC_DC4, .ASC_NAK, .ASC_SYN, .ASC_ETB, .ASC_CAN, .ASC_SUB, .ASC_EM, .ASC_FS, .ASC_GS, .ASC_RS, .ASC_US, .ASC_DEL:
                     break
-                case ASC_ENQ:
-                    let d = Data([ASC_NUL])
+                case .ASC_ENQ:
+                    let d = Data([.ASC_NUL])
                     connection.sendMessage(msg: d)
-                case ASC_BEL:
+                case .ASC_BEL:
                     NSSound(named:"Whit.aiff")?.play()
-                case ASC_BS:
+                case .ASC_BS:
                     if cursorX > 0 {
                         cursorX -= 1
                     }
-                case ASC_HT:
+                case .ASC_HT:
                     cursorX = ((cursorX / 8) + 1) * 8
-                case ASC_LF, ASC_VT, ASC_FF:
+                case .ASC_LF, .ASC_VT, .ASC_FF:
                     if modeLNM == false {
                         cursorX = 0
                     }
@@ -319,9 +320,9 @@ class TerminalFeeder {
                         }
                     }
 
-                case ASC_CR:
+                case .ASC_CR:
                     cursorX = 0
-                case ASC_ESC:
+                case .ASC_ESC:
                     state = .TP_ESCAPE
                 default:
                     // SET_GRID_BYTE
@@ -340,14 +341,14 @@ class TerminalFeeder {
                 }
             case .TP_ESCAPE:
                 switch c{
-                case ASC_ESC:
+                case .ASC_ESC:
                     state = .TP_ESCAPE
-                case ESC_CSI:
+                case .ESC_CSI:
                     csBuf = []
                     csArg = []
                     csTemp = 0
                     state = .TP_CONTROL
-                case ESC_RI:
+                case .ESC_RI:
                     if cursorY == scrollBeginRow {
                         //[_view updateBackedImage];
                         //[_view extendTopFrom: _scrollBeginRow to: _scrollEndRow];
@@ -364,7 +365,7 @@ class TerminalFeeder {
                     }
 
                     state = .TP_NORMAL
-                case ESC_IND:
+                case .ESC_IND:
                     if (cursorY == scrollEndRow) {
                         clear(row: scrollBeginRow)
                         
@@ -381,17 +382,17 @@ class TerminalFeeder {
                     }
 
                     state = .TP_NORMAL
-                case ESC_DECSC:
+                case .ESC_DECSC:
                     savedCursorX = cursorX;
                     savedCursorY = cursorY;
 
                     state = .TP_NORMAL
-                case ESC_DECRC:
+                case .ESC_DECRC:
                     cursorX = savedCursorX;
                     cursorY = savedCursorY;
                     
                     state = .TP_NORMAL
-                case ESC_HASH:
+                case .ESC_HASH:
                     if i < len-1 && bytes[i+1] == "8".utf8.first! {
                         peek = true
                         for y in 0..<row {
@@ -405,15 +406,15 @@ class TerminalFeeder {
                         NSLog("Unhandled <ESC># case")
                     }
                     state = .TP_NORMAL
-                case ESC_sG0:
+                case .ESC_sG0:
                     state = .TP_SCS
-                case ESC_sG1:
+                case .ESC_sG1:
                     state = .TP_SCS
-                case ESC_APPK:
+                case .ESC_APPK:
                     state = .TP_NORMAL
-                case ESC_NUMK:
+                case .ESC_NUMK:
                     state = .TP_NORMAL
-                case ESC_NEL:
+                case .ESC_NEL:
                     cursorX = 0
                     if cursorY == scrollEndRow {
                         clear(row: scrollBeginRow)
@@ -430,7 +431,7 @@ class TerminalFeeder {
                         }
                     }
                     state = .TP_NORMAL
-                case ESC_RIS:
+                case .ESC_RIS:
                     self.clearAll()
                     cursorX = 0
                     cursorY = 0
@@ -455,11 +456,11 @@ class TerminalFeeder {
                         csTemp = 0
                         csBuf = []
                     }
-                } else if c == ASC_BS { // Backspace eats previous parameter.
+                } else if c == .ASC_BS { // Backspace eats previous parameter.
                     if !csBuf.isEmpty {
                         csArg.removeFirst()
                     }
-                } else if c == ASC_VT {// Virtical Tabulation
+                } else if c == .ASC_VT {// Virtical Tabulation
                     if modeLNM == false {
                         cursorX = 0
                     }
@@ -475,7 +476,7 @@ class TerminalFeeder {
                             cursorY = row - 1
                         }
                     }
-                } else if c == ASC_CR { // CR (Carriage Return)
+                } else if c == .ASC_CR { // CR (Carriage Return)
                     cursorX = 0
                 } else {
                     if !csBuf.isEmpty {
@@ -484,7 +485,7 @@ class TerminalFeeder {
                         csBuf = []
                     }
                     switch c {
-                    case CSI_ICH:
+                    case .CSI_ICH:
                         var p: Int = 1
                         if let f = csArg.first {
                             if f >= 1 {
@@ -496,7 +497,7 @@ class TerminalFeeder {
                             terminal?.dirty[cursorY][x] = true
                         }
                         clear(row: cursorY, from: cursorX, to: cursorX + p - 1)
-                    case CSI_CUU: // Cursor Up
+                    case .CSI_CUU: // Cursor Up
                         var p: Int = 1
                         if let f = csArg.first {
                             if (f > 1) {
@@ -510,7 +511,7 @@ class TerminalFeeder {
                         } else if cursorY < 0 {
                             cursorY = 0
                         }
-                    case CSI_CUD:
+                    case .CSI_CUD:
                         
                         var p: Int = 1
                         if let f = csArg.first {
@@ -524,7 +525,7 @@ class TerminalFeeder {
                         } else {
                             cursorY = min(row - 1, cursorY)
                         }
-                    case CSI_CUF:
+                    case .CSI_CUF:
                         var p = 1
                         if let f = csArg.first {
                             if (f > 1) {
@@ -533,7 +534,7 @@ class TerminalFeeder {
                         }
                         cursorX += p
                         cursorX = min(cursorX, column - 1)
-                    case CSI_CUB:
+                    case .CSI_CUB:
                         var p = 1
                         if let f = csArg.first {
                             if (f > 1) {
@@ -543,7 +544,7 @@ class TerminalFeeder {
                         cursorX -= p
                         cursorX = max(0, cursorX)
                         
-                    case CSI_CHA: // move to Pn position of current line
+                    case .CSI_CHA: // move to Pn position of current line
                         var p = 1
                         if let f = csArg.first {
                             if f > 1 {
@@ -552,7 +553,7 @@ class TerminalFeeder {
                             
                         }
                         CURSOR_MOVETO(x: p - 1, y: cursorY)
-                    case CSI_HVP, CSI_CUP:
+                    case .CSI_HVP, .CSI_CUP:
                         // Cursor Position
                         /*  ^[H			: go to row 1, column 1
                          ^[3H		: go to row 3, column 1
@@ -577,7 +578,7 @@ class TerminalFeeder {
                             }
                             CURSOR_MOVETO(x: q - 1, y: p - 1)
                         }
-                    case CSI_ED: // Erase Page (cursor does not move)
+                    case .CSI_ED: // Erase Page (cursor does not move)
                         /*  ^[J, ^[0J	: clear from cursor position to end
                          ^[1J		: clear from start to cursor position
                          ^[2J		: clear all */
@@ -597,7 +598,7 @@ class TerminalFeeder {
                         } else if (!csArg.isEmpty && csArg[0] == 2) {
                             clearAll()
                         }
-                    case CSI_EL: // Erase Line (cursor does not move)
+                    case .CSI_EL: // Erase Line (cursor does not move)
                         /*
                          ^[K, ^[0K	: clear from cursor position to end of line
                          ^[1K		: clear from start of line to cursor position
@@ -610,7 +611,7 @@ class TerminalFeeder {
                         } else if (!csArg.isEmpty && csArg[0] == 2) {
                             clear(row: cursorY)
                         }
-                    case CSI_IL: // Insert Line
+                    case .CSI_IL: // Insert Line
                         var lineNumber = 0;
                         if csArg.isEmpty {
                             lineNumber = 1
@@ -631,7 +632,7 @@ class TerminalFeeder {
                         for j in cursorY..<scrollEndRow {
                             terminal?.setDirty(forRow: j)
                         }
-                    case CSI_DL: // Delete Line
+                    case .CSI_DL: // Delete Line
                         var lineNumber = 0;
                         if csArg.isEmpty {
                             lineNumber = 1
@@ -651,7 +652,7 @@ class TerminalFeeder {
                         for j in cursorY...scrollEndRow {
                             terminal?.setDirty(forRow: j)
                         }
-                    case CSI_DCH: // Delete characters at the current cursor position.
+                    case .CSI_DCH: // Delete characters at the current cursor position.
                         var p = 1
                         if csArg.count == 1 {
                             p = max(csArg[0], p)
@@ -667,20 +668,20 @@ class TerminalFeeder {
                             terminal?.dirty[cursorY][j] = true
                         }
 
-                    case CSI_HPA: // goto to absolute character position
+                    case .CSI_HPA: // goto to absolute character position
                         var p = 0
                         if let f = csArg.first {
                             p = max(f - 1, p)
                         }
                         CURSOR_MOVETO(x: p,y: cursorY)
-                    case CSI_HPR: // goto to the next position of the line
+                    case .CSI_HPR: // goto to the next position of the line
                         var p = 1;
                         if let f = csArg.first {
                             p = max(p, f)
                         }
                         CURSOR_MOVETO(x: cursorX+p, y: cursorY);
 
-                    case CSI_DA: // Computer requests terminal identify itself.
+                    case .CSI_DA: // Computer requests terminal identify itself.
                         var data : Data
                         switch emustd {
                         case .VT100:
@@ -691,19 +692,19 @@ class TerminalFeeder {
                         if csArg.isEmpty || (csArg.count == 1 && csArg[0] == 0){
                             connection.sendMessage(msg: data)
                         }
-                    case CSI_VPA: // move to Pn line, col remaind the same
+                    case .CSI_VPA: // move to Pn line, col remaind the same
                         var p = 0
                         if let f = csArg.first {
                             p = max(f - 1, p)
                         }
                         CURSOR_MOVETO(x: cursorX, y: p)
-                    case CSI_VPR: // move to Pn Line in forward direction
+                    case .CSI_VPR: // move to Pn Line in forward direction
                         var p = 1;
                         if let f = csArg.first {
                             p = max(p, f)
                         }
                         CURSOR_MOVETO(x: cursorX, y: cursorY + p)
-                    case CSI_TBC:
+                    case .CSI_TBC:
                         // Clear a tab at the current column
                         var p = 1
                         if csArg.count == 1 {
@@ -714,7 +715,7 @@ class TerminalFeeder {
                         } else {
                             NSLog("Ignoring request to clear one horizontal tab stop.")
                         }
-                    case CSI_SM: // set mode
+                    case .CSI_SM: // set mode
                         var doClear = false
                         while !csArg.isEmpty {
                             let p = csArg[0]
@@ -766,19 +767,19 @@ class TerminalFeeder {
                             }
                         }
 
-                    case CSI_HPB: // move to Pn Location in backward direction, same raw
+                    case .CSI_HPB: // move to Pn Location in backward direction, same raw
                         var p = 1
                         if let f = csArg.first {
                             p = max(p, f)
                         }
                         CURSOR_MOVETO(x: cursorX - p, y: cursorY)
-                    case CSI_VPB: // move to Pn Line in backward direction
+                    case .CSI_VPB: // move to Pn Line in backward direction
                         var p = 1
                         if let f = csArg.first {
                             p = max(f, p)
                         }
                         CURSOR_MOVETO(x: cursorX, y: cursorY-p)
-                    case CSI_RM: // reset mode
+                    case .CSI_RM: // reset mode
                         var doClear = false
                         while !csArg.isEmpty {
                             let p = csArg[0]
@@ -823,7 +824,7 @@ class TerminalFeeder {
                             cursorY = 0
                         }
 
-                    case CSI_SGR:
+                    case .CSI_SGR:
                         // Character Attributes
                         if csArg.isEmpty { // clear
                             fgColor = 7
@@ -860,13 +861,13 @@ class TerminalFeeder {
                                 }
                             }
                         }
-                    case CSI_DSR:
+                    case .CSI_DSR:
                         if csArg.count == 1{
                             let f = csArg[0]
                             switch f {
                             case 5:
                                 // Report Device OK	<ESC>[0n
-                                connection.sendMessage(msg: Data([0x1B, 0x5B, 0x30, CSI_DSR]))
+                                connection.sendMessage(msg: Data([0x1B, 0x5B, 0x30, .CSI_DSR]))
                             case 6:	// Report Device OK	<ESC>[y;xR
 
                                 var data = Data([0x1B, 0x5B])
@@ -879,13 +880,13 @@ class TerminalFeeder {
                                     data.append(0x30 + UInt8((cursorX + 1)/10))
                                 }
                                 data.append(0x30 + UInt8((cursorX + 1) % 10))
-                                data.append(CSI_CPR)
+                                data.append(.CSI_CPR)
                                 connection.sendMessage(msg: data)
                             default:
                                 break
                             }
                         }
-                    case CSI_DECSTBM: // Assigning Scrolling Region
+                    case .CSI_DECSTBM: // Assigning Scrolling Region
                         switch csArg.count {
                         case 0:
                             scrollBeginRow = 0
@@ -900,11 +901,11 @@ class TerminalFeeder {
                         }
                         cursorX = 0
                         cursorY = scrollBeginRow;
-                    case CSI_SCP:
+                    case .CSI_SCP:
                         savedCursorX = cursorX
                         savedCursorY = cursorY
 
-                    case CSI_RCP:
+                    case .CSI_RCP:
                         if savedCursorX >= 0 && savedCursorY >= 0 {
                             cursorX = savedCursorX
                             cursorY = savedCursorY
