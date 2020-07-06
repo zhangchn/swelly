@@ -348,7 +348,7 @@ class TermView: NSView {
                     let attrDict = CTRunGetAttributes(run) as Dictionary
                     let runFont = attrDict[kCTFontAttributeName] as! CTFont
                     let cgFont = CTFontCopyGraphicsFont(runFont, nil)
-                    let runColor = (attrDict[NSAttributedStringKey.foregroundColor as NSObject] as? NSColor) ?? NSColor.red
+                    let runColor = (attrDict[NSAttributedString.Key.foregroundColor as NSObject] as? NSColor) ?? NSColor.red
                     
                     context.setFont(cgFont)
                     context.setFontSize(CTFontGetSize(runFont))
@@ -712,8 +712,8 @@ extension TermView: NSTextInputClient {
         _markedRange.location = 0
         _markedRange.length = attrString.length
         let mAttrString = NSMutableAttributedString(attributedString: attrString)
-        mAttrString.addAttribute(NSAttributedStringKey.font, value: textField.defaultFont, range: NSRange(location: 0, length: attrString.length))
-        mAttrString.addAttribute(NSAttributedStringKey.foregroundColor, value: NSColor.white, range: NSRange(location: 0, length: attrString.length))
+        mAttrString.addAttribute(NSAttributedString.Key.font, value: textField.defaultFont, range: NSRange(location: 0, length: attrString.length))
+        mAttrString.addAttribute(NSAttributedString.Key.foregroundColor, value: NSColor.white, range: NSRange(location: 0, length: attrString.length))
         
         textField.string = mAttrString
         textField.selectedRange = selectedRange
@@ -767,7 +767,7 @@ extension TermView: NSTextInputClient {
         return NSAttributedString(string: substring)
     }
     
-    func validAttributesForMarkedText() -> [NSAttributedStringKey] {
+    func validAttributesForMarkedText() -> [NSAttributedString.Key] {
         return []
     }
     
@@ -859,7 +859,7 @@ extension TermView {
 
 extension TermView {
     // MARK: Actions
-    @IBAction func copy(_ sender: Any){
+    @IBAction func copy(_ sender: Any?){
         guard connected, selectionLength != 0 else  {
             return
         }
@@ -894,9 +894,10 @@ extension TermView {
 //                length:length] 
 //                forType:ANSIColorPBoardType];
         }
+        clearSelection()
     }
     
-    func paste(_ sender: Any) {
+    @IBAction func paste(_ sender: Any?) {
         guard connected else {
             return
         }
@@ -1048,12 +1049,13 @@ extension TermView {
             // dead key pressed
             return
         }
+        /*
         guard let c = event.characters?.utf16.first else { return }
         switch Int(c) {
-        case NSLeftArrowFunctionKey, NSUpArrowFunctionKey:
+        case NSEvent.SpecialKey.leftArrow.rawValue, NSEvent.SpecialKey.upArrow.rawValue:
             // TODO: effectView.showIndicatorAtPoint(urlManager.movePrev())
             break
-        case Int(WLTabCharacter), NSRightArrowFunctionKey, NSDownArrowFunctionKey:
+        case Int(WLTabCharacter), NSEvent.SpecialKey.rightArrow.rawValue, NSEvent.SpecialKey.downArrow.rawValue:
             // TODO:
             break
         case Int(WLEscapeCharacter):
@@ -1069,7 +1071,16 @@ extension TermView {
         default:
             break
         }
+         */
+        switch event.keyCode {
+        case WLEscapeCharacter:
+            exitURL()
+        default:
+            break
+        }
         clearSelection()
+        guard let c = event.characters?.utf16.first else { return }
+        let k = NSEvent.SpecialKey(rawValue: Int(c))
         var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
         if let ds = frontMostTerminal {
             if event.modifierFlags.contains(NSEvent.ModifierFlags.control) && !event.modifierFlags.contains(NSEvent.ModifierFlags.option) {
@@ -1077,17 +1088,17 @@ extension TermView {
                 return
             }
             var isArrowKey = true
-            switch Int(c) {
-            case NSUpArrowFunctionKey:
+            switch k {
+            case .upArrow:
                 arrow[2] = "A".utf8.first!
                 arrow[5] = "A".utf8.first!
-            case NSDownArrowFunctionKey:
+            case .downArrow:
                 arrow[2] = "B".utf8.first!
                 arrow[5] = "B".utf8.first!
-            case NSRightArrowFunctionKey:
+            case .rightArrow:
                 arrow[2] = "C".utf8.first!
                 arrow[5] = "C".utf8.first!
-            case NSLeftArrowFunctionKey:
+            case .leftArrow:
                 arrow[2] = "D".utf8.first!
                 arrow[5] = "D".utf8.first!
             default:
@@ -1097,8 +1108,8 @@ extension TermView {
            
             if !hasMarkedText() && isArrowKey {
                 ds.updateDoubleByteState(for: ds.cursorRow)
-                if Int(c) == NSRightArrowFunctionKey && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn).doubleByte == 1
-                || Int(c) == NSLeftArrowFunctionKey && ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2 {
+                if k == .rightArrow && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn).doubleByte == 1
+                || k == .leftArrow && ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2 {
                     if frontMostConnection?.site.shouldDetectDoubleByte ?? false {
                         frontMostConnection!.sendMessage(msg: Data(arrow))
                         return
@@ -1107,12 +1118,12 @@ extension TermView {
                 frontMostConnection?.sendMessage(msg: Data(arrow).subdata(in: 0..<3))
                 return
             }
-            if !hasMarkedText() && Int(c) == NSDeleteCharacter {
+            if !hasMarkedText() && k == .delete {
                 if (frontMostConnection?.site.shouldDetectDoubleByte ?? false &&
                     ds.cursorColumn > 0 && ds.attribute(atRow: ds.cursorRow, column: ds.cursorColumn - 1).doubleByte == 2) {
-                    frontMostConnection?.sendMessage(msg: Data([UInt8(NSDeleteCharacter), UInt8(NSDeleteCharacter)]))
+                    frontMostConnection?.sendMessage([.delete, .delete])
                 } else {
-                    frontMostConnection?.sendMessage(msg: Data([UInt8(NSDeleteCharacter)]))
+                    frontMostConnection?.sendMessage([.delete])
                 }
                 return;
             }
