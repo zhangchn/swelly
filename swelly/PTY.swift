@@ -279,14 +279,13 @@ class PTY {
         delegate?.pty(self, willSend: data)
         var length = data.count
         data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
-            //let base = bytes.bindMemory(to: UInt8.self).baseAddress!
             var writefds = fd_set()
             var errorfds = fd_set()
             var timeout = timeval()
             
             
             var chunkSize: Int
-            var msg = bytes.baseAddress! //UnsafeRawPointer(bytes)
+            var msg = bytes.baseAddress!
             while length > 0 {
 //                bzero(&writefds, MemoryLayout<fd_set>.size)
 //                bzero(&errorfds, MemoryLayout<fd_set>.size)

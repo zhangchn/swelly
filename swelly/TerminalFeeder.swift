@@ -241,11 +241,7 @@ class TerminalFeeder {
         terminal?.setAllDirty()
     }
     func feed(data: Data, connection: Connection) {
-        _ = data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
-            let base = bytes.bindMemory(to: UInt8.self).baseAddress
-            feed(bytes: base!, length: data.count, connection: connection)
-        }
-//        data.withUnsafeBytes { (bytes : UnsafePointer<UInt8>) in
+        data.withUnsafeBytes { (bytes : UnsafeRawBufferPointer) in
 //            #if DEBUG
 //            var debugOutput = "feed:"
 //            for idx in 0..<data.count {
@@ -269,11 +265,11 @@ class TerminalFeeder {
 //            }
 //            print(debugOutput)
 //            #endif
-//            feed(bytes: bytes, length: data.count, connection: connection)
-//        }
+            feed(bytes: bytes, connection: connection)
+        }
     }
     
-    func feed(bytes: UnsafePointer<UInt8>, length len: Int, connection: Connection) {
+    func feed(bytes: UnsafeRawBufferPointer, connection: Connection) {
 //        var x: Int
         var peek = false
         if let term = terminal {
@@ -281,6 +277,7 @@ class TerminalFeeder {
                 hasNewMessage = false
             }
         }
+        let len = bytes.count
         for i in 0..<len {
             if peek {
                 peek = false

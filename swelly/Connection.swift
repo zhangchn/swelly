@@ -133,12 +133,12 @@ class Connection : NSObject, PTYDelegate {
         let service = "Welly".data(using: .utf8)
         service?.withUnsafeBytes() { (buffer : UnsafeRawBufferPointer) in
             let accountData = (userName! + "@" + site.address).data(using: .utf8)!
-            let base1 = buffer.bindMemory(to: Int8.self).baseAddress!
             accountData.withUnsafeBytes() {(buffer2 : UnsafeRawBufferPointer) in
                 var len = UInt32(0)
                 var pass : UnsafeMutableRawPointer? = nil
-                let base2 = buffer2.bindMemory(to: Int8.self).baseAddress!
-                if noErr == SecKeychainFindGenericPassword(nil, UInt32(service!.count), base1, UInt32(accountData.count), base2, &len, &pass, nil) {
+                let serviceNamePtr = buffer.baseAddress!.assumingMemoryBound(to: Int8.self)
+                let accountNamePtr = buffer2.baseAddress!.assumingMemoryBound(to: Int8.self)
+                if noErr == SecKeychainFindGenericPassword(nil, UInt32(service!.count), serviceNamePtr, UInt32(accountData.count), accountNamePtr, &len, &pass, nil) {
                     sendMessage(msg: Data(bytes: pass!, count: Int(len)))
                     sendMessage(msg: Data([0x0d]))
                     SecKeychainItemFreeContent(nil, pass)
