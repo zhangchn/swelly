@@ -1084,7 +1084,9 @@ extension TermView {
         var arrow : [UInt8] = [0x1B, 0x4F, 0x00, 0x1B, 0x4F, 0x00]
         if let ds = frontMostTerminal {
             if event.modifierFlags.contains(NSEvent.ModifierFlags.control) && !event.modifierFlags.contains(NSEvent.ModifierFlags.option) {
-                frontMostConnection?.sendMessage(msg: Data([UInt8(c)]))
+                if c <= 0xff {
+                    frontMostConnection?.sendMessage(msg: Data([UInt8(c)]))
+                }
                 return
             }
             var isArrowKey = true
