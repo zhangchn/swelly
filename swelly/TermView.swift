@@ -112,11 +112,11 @@ class TermView: NSView {
     
     lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
 
-    static var gLeftImage: NSImage!
+    //static var gLeftImage: NSImage!
     func configure() {
         let gConfig = GlobalConfig.sharedInstance
         self.setFrameSize(gConfig.contentSize)
-        TermView.gLeftImage = NSImage(size: NSSize(width: fontWidth, height: fontHeight))
+        //TermView.gLeftImage = NSImage(size: NSSize(width: fontWidth, height: fontHeight))
         singleAdvance = [CGSize](repeating: CGSize(width: fontWidth, height: 0), count: maxColumn)
         doubleAdvance = [CGSize](repeating: CGSize(width: fontWidth * 2.0, height: 0), count: maxColumn)
         // TODO: configure ascii art
@@ -392,6 +392,7 @@ class TermView: NSView {
                         }
                         lastIndex = index
                     }
+                    /*
                     for runGlyphIndex in 0 ... runGlyphCount {
                         if buffer[glyphOffset + runGlyphIndex].1 {
                             let range = CFRangeMake(runGlyphIndex, 1)
@@ -423,6 +424,7 @@ class TermView: NSView {
                             }
                         }
                     }
+                     */
                     glyphOffset += runGlyphCount
                 }
                 
