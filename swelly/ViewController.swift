@@ -50,11 +50,12 @@ class ViewController: NSViewController {
         super.viewDidLoad()
         windowDelegate.controller = self
         idleTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self](timer) in
-            let termView = self!.termView!
-            if termView.connected {
-                termView.connection?.sendAntiIdle()
-            }
+            self?.termView?.connection?.sendAntiIdle()
         }
+    }
+    
+    deinit {
+        idleTimer.invalidate()
     }
     
     override var representedObject: Any? {
@@ -121,12 +122,14 @@ class ViewController: NSViewController {
 
 class MainWindowDelegate: NSObject, NSWindowDelegate {
     weak var controller: ViewController!
+    /*
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         
         sender.setIsVisible(false)
         
         return false
     }
+     */
     func windowWillEnterFullScreen(_ notification: Notification) {
         controller.disableConstraintsForFullScreen()
     }
