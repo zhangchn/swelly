@@ -137,8 +137,9 @@ class TermView: NSView {
     
     private func updateBackground(row: Int, from start: Int, to end: Int) {
         guard let ds = frontMostTerminal else {return }
+        let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
+        setNeedsDisplay(rowRect)
         ds.withCells(ofRow: row) { cells in
-            let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
             var lastAttr = cells[start].attribute
             var length = 0
             var currAttr : Cell.Attribute!
@@ -167,7 +168,6 @@ class TermView: NSView {
                     length += 1
                 }
             }
-            setNeedsDisplay(rowRect)
         }
         
     }
@@ -402,11 +402,11 @@ class TermView: NSView {
                             let bgColor = bgColorIndexOfAttribute(cells[index].attribute)
                             let fgColor = fgColorIndexOfAttribute(cells[index].attribute)
                             
-                            TermView.gLeftImage.lockFocus()
                             config.bgColor(atIndex: Int(bgColor), highlight: bgBoldOfAttribute(cells[index].attribute)).set()
                             let rect = NSRect(origin: NSZeroPoint, size: TermView.gLeftImage.size)
                             rect.fill()
                             if let tempContext = NSGraphicsContext.current?.cgContext {
+                                TermView.gLeftImage.lockFocus()
                                 tempContext.setShouldSmoothFonts(config.shouldSmoothFonts)
                                 let tempColor = config.color(atIndex: Int(fgColor), highlight: fgBoldOfAttribute(cells[index].attribute))
                                 tempContext.setFont(cgFont)
@@ -455,7 +455,9 @@ class TermView: NSView {
 
     func refreshDisplay() {
         frontMostTerminal?.setAllDirty()
-        updateBackedImage()
+        autoreleasepool() {
+            updateBackedImage()
+        }
         needsDisplay = true
     }
     

@@ -70,7 +70,9 @@ class Connection : NSObject, PTYDelegate {
         processing = false
         connected = true
         Thread.detachNewThread {
-            self.login()
+            autoreleasepool { [weak self] () in
+                self?.login()
+            }
         }
         NotificationCenter.default.post(name: .connectionDidConnect, object: self)
     }
