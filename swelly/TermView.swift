@@ -80,34 +80,37 @@ class TermView: NSView {
     }
     
     func updateBackedImage() {
-        backedImage.lockFocus()
-        let context = NSGraphicsContext.current?.cgContext
-        if let ds = frontMostTerminal {
-            for y in 0 ..< maxRow {
-                var x = 0
-                while x < maxColumn {
-                    if ds.isDirty(atRow: y, column: x) {
-                        let start = x
-                        while x < maxColumn && ds.isDirty(atRow: y, column: x) {
-                            x += 1
+        autoreleasepool {
+            backedImage.lockFocus()
+            let context = NSGraphicsContext.current?.cgContext
+            if let ds = frontMostTerminal {
+                for y in 0 ..< maxRow {
+                    var x = 0
+                    while x < maxColumn {
+                        if ds.isDirty(atRow: y, column: x) {
+                            let start = x
+                            while x < maxColumn && ds.isDirty(atRow: y, column: x) {
+                                x += 1
+                            }
+                            updateBackground(row: y, from: start, to: x)
                         }
-                        updateBackground(row: y, from: start, to: x)
+                        x += 1
                     }
-                    x += 1
                 }
+                context?.saveGState()
+                context?.setShouldSmoothFonts(GlobalConfig.sharedInstance.shouldSmoothFonts)
+                for y in 0..<maxRow {
+                    drawString(row: y, context: context)
+                }
+                context?.restoreGState()
+                ds.removeAllDirtyMarks()
+            } else {
+                NSColor.clear.set()
+                context?.fill(CGRect(x: 0, y: 0, width: CGFloat(maxColumn) * fontWidth, height: CGFloat(maxRow) * fontHeight))
             }
-            context?.saveGState()
-            context?.setShouldSmoothFonts(GlobalConfig.sharedInstance.shouldSmoothFonts)
-            for y in 0..<maxRow {
-                drawString(row: y, context: context)
-            }
-            context?.restoreGState()
-            ds.removeAllDirtyMarks()
-        } else {
-            NSColor.clear.set()
-            context?.fill(CGRect(x: 0, y: 0, width: CGFloat(maxColumn) * fontWidth, height: CGFloat(maxRow) * fontHeight))
+            backedImage.unlockFocus()
+
         }
-        backedImage.unlockFocus()
     }
     
     lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
@@ -465,13 +468,15 @@ class TermView: NSView {
         
     }
     fileprivate func tick() {
-        updateBackedImage()
-        if let ds = frontMostTerminal {
-            if x != ds.cursorColumn || y != ds.cursorRow {
-                setNeedsDisplay(NSRect(x: CGFloat(x) * fontWidth , y: CGFloat(maxRow - 1 - y) *  fontHeight, width: fontWidth, height: fontHeight))
-                setNeedsDisplay(NSRect(x: CGFloat(ds.cursorColumn) * fontWidth, y: CGFloat(maxRow - 1 - ds.cursorRow) * fontHeight, width: fontWidth, height: fontHeight))
-                x = ds.cursorColumn
-                y = ds.cursorRow
+        autoreleasepool() {
+            updateBackedImage()
+            if let ds = frontMostTerminal {
+                if x != ds.cursorColumn || y != ds.cursorRow {
+                    setNeedsDisplay(NSRect(x: CGFloat(x) * fontWidth , y: CGFloat(maxRow - 1 - y) *  fontHeight, width: fontWidth, height: fontHeight))
+                    setNeedsDisplay(NSRect(x: CGFloat(ds.cursorColumn) * fontWidth, y: CGFloat(maxRow - 1 - ds.cursorRow) * fontHeight, width: fontWidth, height: fontHeight))
+                    x = ds.cursorColumn
+                    y = ds.cursorRow
+                }
             }
         }
         
