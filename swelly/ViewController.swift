@@ -83,17 +83,18 @@ class ViewController: NSViewController {
             }
         }
         disconnectObserver = NotificationCenter.default.addObserver(forName: .connectionDidDisconnect, object: connection, queue: .main) { [weak self](note) in
-            if let ob1 = self?.connectObserver {
+            guard let self = self else { return }
+            if let ob1 = self.connectObserver {
                 NotificationCenter.default.removeObserver(ob1)
             }
-            if let ob2 = self?.disconnectObserver {
+            if let ob2 = self.disconnectObserver {
                 NotificationCenter.default.removeObserver(ob2)
             }
-            if let vc = self?.currentConnectionViewController {
+            if let vc = self.currentConnectionViewController {
                 vc.resetUI()
             } else {
                 let identifier = "login-segue"
-                self?.performSegue(withIdentifier: identifier, sender: self!)
+                self.performSegue(withIdentifier: identifier, sender: self)
             }
         }
     }

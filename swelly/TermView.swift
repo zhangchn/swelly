@@ -8,7 +8,7 @@
 
 import AppKit
 
-class TermView: NSView {
+class TermView: NSView, CALayerDelegate {
     
     var fontWidth: CGFloat
     
@@ -47,14 +47,15 @@ class TermView: NSView {
     override var preservesContentDuringLiveResize: Bool { return true }
     
     override init(frame: NSRect) {
-        
         let config = GlobalConfig.sharedInstance
         fontWidth = config.cellWidth
         fontHeight = config.cellHeight
         maxRow = config.row
         maxColumn = config.column
         super.init(frame: frame)
-        
+        wantsLayer = true
+        layer?.delegate = self
+
         self.configure()
         // TODO: Register KVO
 
@@ -76,6 +77,9 @@ class TermView: NSView {
         maxRow = config.row
         maxColumn = config.column
         super.init(coder: coder)
+        wantsLayer = true
+        layer?.delegate = self
+
         self.configure()
     }
     
@@ -519,6 +523,13 @@ class TermView: NSView {
         adjustFonts()
     }
     
+    func draw(_ layer: CALayer, in ctx: CGContext) {
+        ctx.setFillColor(GlobalConfig.sharedInstance.colorBG.cgColor)
+        ctx.fill(layer.bounds)
+        guard connected else {return}
+        
+    }
+    /*
     override func draw(_ dirtyRect: NSRect) {
         
         if inLiveResize {
@@ -568,7 +579,7 @@ class TermView: NSView {
             }
         }
     }
-    
+     */
     func terminalDidUpdate(_ terminal: Terminal!) {
         if let f = self.frontMostTerminal {
             if f === terminal {
