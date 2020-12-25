@@ -8,7 +8,7 @@
 
 import AppKit
 
-class TermView: NSView, CALayerDelegate {
+class TermView: NSView {
     
     var fontWidth: CGFloat
     
@@ -53,8 +53,8 @@ class TermView: NSView, CALayerDelegate {
         maxRow = config.row
         maxColumn = config.column
         super.init(frame: frame)
-        wantsLayer = true
-        layer?.delegate = self
+        //wantsLayer = true
+        //layer?.delegate = self
 
         self.configure()
         // TODO: Register KVO
@@ -77,16 +77,24 @@ class TermView: NSView, CALayerDelegate {
         maxRow = config.row
         maxColumn = config.column
         super.init(coder: coder)
-        wantsLayer = true
-        layer?.delegate = self
+        //wantsLayer = true
+        //layer?.delegate = self
 
         self.configure()
     }
     
     func updateBackedImage() {
         autoreleasepool {
-            backedImage.lockFocus()
-            let context = NSGraphicsContext.current?.cgContext
+            guard let backedLayer = backedLayer, let context = backedLayer.context else {
+                needsDisplay = true
+//                DispatchQueue.main.async { [weak self] in
+//                    self?.updateBackedImage()
+//                }
+                return
+            }
+            //backedImage.lockFocus()
+            //let context = NSGraphicsContext.current?.cgContext
+            
             if let ds = frontMostTerminal {
                 for y in 0 ..< maxRow {
                     var x = 0
@@ -96,28 +104,30 @@ class TermView: NSView, CALayerDelegate {
                             while x < maxColumn && ds.isDirty(atRow: y, column: x) {
                                 x += 1
                             }
-                            updateBackground(row: y, from: start, to: x)
+                            updateBackground(row: y, from: start, to: x, in: context)
                         }
                         x += 1
                     }
                 }
-                context?.saveGState()
-                context?.setShouldSmoothFonts(GlobalConfig.sharedInstance.shouldSmoothFonts)
+                context.saveGState()
+                context.setShouldSmoothFonts(GlobalConfig.sharedInstance.shouldSmoothFonts)
                 for y in 0..<maxRow {
                     drawString(row: y, context: context)
                 }
-                context?.restoreGState()
+                context.restoreGState()
                 ds.removeAllDirtyMarks()
             } else {
                 NSColor.clear.set()
-                context?.fill(CGRect(x: 0, y: 0, width: CGFloat(maxColumn) * fontWidth, height: CGFloat(maxRow) * fontHeight))
+                context.fill(CGRect(x: 0, y: 0, width: CGFloat(maxColumn) * fontWidth, height: CGFloat(maxRow) * fontHeight))
             }
-            backedImage.unlockFocus()
+            // backedImage.unlockFocus()
 
         }
     }
     
     lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
+    
+    var backedLayer: CGLayer!
 
     //static var gLeftImage: NSImage!
     func configure() {
@@ -142,7 +152,7 @@ class TermView: NSView, CALayerDelegate {
         // TODO: asciiartrender
     }
     
-    private func updateBackground(row: Int, from start: Int, to end: Int) {
+    private func updateBackground(row: Int, from start: Int, to end: Int, in context: CGContext) {
         guard let ds = frontMostTerminal else {return }
         let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
         setNeedsDisplay(rowRect)
@@ -164,8 +174,11 @@ class TermView: NSView, CALayerDelegate {
                     let rect = NSMakeRect(CGFloat(c - length) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, fontWidth * CGFloat(length), fontHeight)
                     // Modified by K.O.ed: All background color use same alpha setting.
                     let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
-                    bgColor.set()
-                    rect.fill()
+                    // bgColor.set()
+                    context.saveGState()
+                    context.setFillColor(bgColor.cgColor)
+                    context.fill(rect)
+                    context.restoreGState()
                     /* finish this segment */
                     length = 1
                     lastAttr = currAttr
@@ -359,6 +372,8 @@ class TermView: NSView, CALayerDelegate {
                     
                     context.setFont(cgFont)
                     context.setFontSize(CTFontGetSize(runFont))
+                    context.setStrokeColor(red: runColor.redComponent, green: runColor.greenComponent, blue: runColor.blueComponent, alpha: 1.0)
+
                     context.setFillColor(red: runColor.redComponent, green: runColor.greenComponent, blue: runColor.blueComponent, alpha: 1.0)
                     context.setLineWidth(1.0)
                     
@@ -386,11 +401,18 @@ class TermView: NSView, CALayerDelegate {
                                 let drawingMode : CGTextDrawingMode = showsHidden && hidden ? .stroke : .fill;
                                 
                                 context.setTextDrawingMode(drawingMode)
+                                context.textMatrix = CTRunGetTextMatrix(run)
                                 var glyphs = [CGGlyph](repeating: CGGlyph(0), count:len)
                                 let glyphRange = CFRangeMake(location, len)
                                 
                                 CTRunGetGlyphs(run, glyphRange, &glyphs)
                                 context.showGlyphs(glyphs, at: Array(positions[(glyphOffset + location)..<(glyphOffset + runGlyphIndex)]))
+//                                CTRunDraw(run, context, glyphRange)
+//                                positions.withUnsafeBufferPointer { (ptr) in
+//                                    let p = ptr.baseAddress! + glyphOffset + location
+//                                    CTFontDrawGlyphs(runFont, &glyphs, p, len, context)
+//                                }
+                                
                             }
                             location = runGlyphIndex
                             if runGlyphIndex != runGlyphCount {
@@ -449,9 +471,16 @@ class TermView: NSView, CALayerDelegate {
                         }
                         x += 1
                     }
-                    config.color(atIndex: Int(beginColor), highlight: beginBold).set()
+                    let underlineColor = config.color(atIndex: Int(beginColor), highlight: beginBold)
+                    context?.beginPath()
+                    context?.setStrokeColor(underlineColor.cgColor)
+                    context?.move(to: NSPoint(x: CGFloat(begin) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
+                    context?.addLine(to: NSPoint(x: CGFloat(x) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
+                    context?.strokePath()
+                    /*
                     NSBezierPath.strokeLine(from: NSPoint(x: CGFloat(begin) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5),
                                             to: NSPoint(x: CGFloat(x) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
+ */
                     x -= 1
                 }
             }
@@ -515,21 +544,18 @@ class TermView: NSView, CALayerDelegate {
         refreshDisplay()
     }
     
+    var layerResized = false
     override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
-        if bounds.width > backedImage.size.width || bounds.height > backedImage.size.height {
-            backedImage = NSImage(size: bounds.size)
+//        if bounds.width > backedImage.size.width || bounds.height > backedImage.size.height {
+//            backedImage = NSImage(size: bounds.size)
+//        }
+        if bounds.width > backedLayer.size.width || bounds.height > backedLayer.size.height {
+            layerResized = true
         }
         adjustFonts()
     }
     
-    func draw(_ layer: CALayer, in ctx: CGContext) {
-        ctx.setFillColor(GlobalConfig.sharedInstance.colorBG.cgColor)
-        ctx.fill(layer.bounds)
-        guard connected else {return}
-        
-    }
-    /*
     override func draw(_ dirtyRect: NSRect) {
         
         if inLiveResize {
@@ -540,11 +566,18 @@ class TermView: NSView, CALayerDelegate {
         }
         GlobalConfig.sharedInstance.colorBG.set()
         bounds.fill()
+        if backedLayer == nil || layerResized {
+            let context = NSGraphicsContext.current!.cgContext
+            backedLayer = CGLayer(context, size: self.bounds.size, auxiliaryInfo: nil)
+            layerResized = false
+        }
         if connected {
             // Draw the backed image
             var imgRect = dirtyRect
             imgRect.origin.y = fontHeight * CGFloat(maxRow) - dirtyRect.origin.y - dirtyRect.size.height
-            backedImage.draw(at: dirtyRect.origin, from: dirtyRect, operation: .copy, fraction: 1.0)
+            //backedImage.draw(at: dirtyRect.origin, from: dirtyRect, operation: .copy, fraction: 1.0)
+            NSGraphicsContext.current!.cgContext.draw(backedLayer, in: self.bounds)
+            
             // TODO:
             drawBlink()
             // Draw the url underline
@@ -579,7 +612,7 @@ class TermView: NSView, CALayerDelegate {
             }
         }
     }
-     */
+     
     func terminalDidUpdate(_ terminal: Terminal!) {
         if let f = self.frontMostTerminal {
             if f === terminal {
