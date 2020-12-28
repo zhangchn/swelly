@@ -131,6 +131,12 @@ class MainWindowDelegate: NSObject, NSWindowDelegate {
         return false
     }
      */
+    func windowWillClose(_ notification: Notification) {
+        if let termView = controller.termView {
+            termView.connection?.close()
+        }
+    }
+    
     func windowWillEnterFullScreen(_ notification: Notification) {
         controller.disableConstraintsForFullScreen()
     }

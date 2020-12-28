@@ -84,7 +84,7 @@ class TermView: NSView {
     }
     
     func updateBackedImage() {
-        autoreleasepool {
+        //autoreleasepool {
             guard let backedLayer = backedLayer, let context = backedLayer.context else {
                 needsDisplay = true
 //                DispatchQueue.main.async { [weak self] in
@@ -122,15 +122,16 @@ class TermView: NSView {
             }
             // backedImage.unlockFocus()
 
-        }
+        //}
     }
     
-    lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
+    // lazy var backedImage = NSImage(size: NSSize(width: 960, height: 700))
     
     var backedLayer: CGLayer!
 
     //static var gLeftImage: NSImage!
     func configure() {
+        wantsLayer = true
         let gConfig = GlobalConfig.sharedInstance
         self.setFrameSize(gConfig.contentSize)
         //TermView.gLeftImage = NSImage(size: NSSize(width: fontWidth, height: fontHeight))
@@ -156,6 +157,7 @@ class TermView: NSView {
         guard let ds = frontMostTerminal else {return }
         let rowRect = NSMakeRect(CGFloat(start) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, CGFloat(end - start) * fontWidth, fontHeight)
         setNeedsDisplay(rowRect)
+        let scale = layer!.contentsScale
         ds.withCells(ofRow: row) { cells in
             var lastAttr = cells[start].attribute
             var length = 0
@@ -171,7 +173,7 @@ class TermView: NSView {
                     currentBold = bgBoldOfAttribute(currAttr)
                 }
                 if (currentBackgroundColor != lastBackgroundColor || currentBold != lastBold || c == end) {
-                    let rect = NSMakeRect(CGFloat(c - length) * fontWidth, CGFloat(maxRow - 1 - row) * fontHeight, fontWidth * CGFloat(length), fontHeight)
+                    let rect = NSMakeRect(CGFloat(c - length) * fontWidth * scale, CGFloat(maxRow - 1 - row) * fontHeight * scale, fontWidth * CGFloat(length) * scale, fontHeight * scale)
                     // Modified by K.O.ed: All background color use same alpha setting.
                     let bgColor = GlobalConfig.sharedInstance.bgColor(atIndex: Int(lastBackgroundColor), highlight: lastBold)
                     // bgColor.set()
@@ -247,6 +249,8 @@ class TermView: NSView {
         var buffer = [(Bool, Bool, unichar, Int)]()
         var textBytes = Data()
         var positions = [CGPoint]()
+        let scale = layer!.contentsScale
+
         ds.withCells(ofRow: row) { (cells) in
             for x in start..<maxColumn {
                 if !ds.isDirty(atRow: row, column: x) {
@@ -259,7 +263,7 @@ class TermView: NSView {
                     let isDoubleColor = false
                     let text = cells[x].byte > 0 ? unichar(cells[x].byte) : " ".utf16.first!
                     let index = x
-                    let position = CGPoint(x: CGFloat(x) * fontWidth + ePaddingLeft, y: CGFloat(maxRow - 1 - row) * fontHeight + CTFontGetDescent(eCTFont!) + ePaddingBottom)
+                    let position = CGPoint(x: (CGFloat(x) * fontWidth + ePaddingLeft) * scale, y: (CGFloat(maxRow - 1 - row) * fontHeight + ePaddingBottom) * scale + CTFontGetDescent(eCTFont!) )
                     buffer.append((isDouble, isDoubleColor, text, index))
                     positions.append(position)
                     textBytes.append(cells[x].byte > 0 ? cells[x].byte : " ".utf8.first!)
@@ -277,7 +281,7 @@ class TermView: NSView {
                     //let text = ch
                     
                     let index = x
-                    let position = CGPoint(x: CGFloat(x - 1) * fontWidth + cPaddingLeft, y: CGFloat(maxRow - 1 - row) * fontHeight + CTFontGetDescent(cCTFont!) + cPaddingBottom)
+                    let position = CGPoint(x: (CGFloat(x - 1) * fontWidth + cPaddingLeft) * scale, y: (CGFloat(maxRow - 1 - row) * fontHeight + cPaddingBottom) * scale + CTFontGetDescent(cCTFont!))
                     
                     if siteEncoding == .gbk {
                         if cells[x-1].byte < 0x81 ||
@@ -491,9 +495,9 @@ class TermView: NSView {
 
     func refreshDisplay() {
         frontMostTerminal?.setAllDirty()
-        autoreleasepool() {
+        //autoreleasepool() {
             updateBackedImage()
-        }
+        //}
         needsDisplay = true
     }
     
@@ -501,7 +505,7 @@ class TermView: NSView {
         
     }
     fileprivate func tick() {
-        autoreleasepool() {
+        //autoreleasepool() {
             updateBackedImage()
             if let ds = frontMostTerminal {
                 if x != ds.cursorColumn || y != ds.cursorRow {
@@ -511,12 +515,12 @@ class TermView: NSView {
                     y = ds.cursorRow
                 }
             }
-        }
+        //}
         
     }
     
     
-    var liveResizeCache : NSImage?
+    var liveResizeCache : NSImage!
     var liveResizeCacheBounds : NSRect?
     override func viewWillStartLiveResize() {
         super.viewWillStartLiveResize()
@@ -528,10 +532,11 @@ class TermView: NSView {
         fontHeight = bounds.height / CGFloat(maxRow)
         fontWidth = bounds.width / CGFloat(maxColumn)
         let config = GlobalConfig.sharedInstance
+        let scale = NSScreen.main!.backingScaleFactor
         config.cellHeight = fontHeight
         config.cellWidth = fontWidth
-        config.englishFontSize = 18.0 / 24.0 * fontHeight
-        config.chineseFontSize = 22.0 / 24.0 * fontHeight
+        config.englishFontSize = 18.0 / 24.0 * fontHeight * scale
+        config.chineseFontSize = 22.0 / 24.0 * fontHeight * scale
         config.chineseFont = CTFontCreateWithName(config.chineseFontName as CFString, config.chineseFontSize, nil)
         config.englishFont = CTFontCreateWithName(config.englishFontName as CFString, config.englishFontSize, nil)
         
@@ -550,7 +555,7 @@ class TermView: NSView {
 //        if bounds.width > backedImage.size.width || bounds.height > backedImage.size.height {
 //            backedImage = NSImage(size: bounds.size)
 //        }
-        if bounds.width > backedLayer.size.width || bounds.height > backedLayer.size.height {
+        if bounds.width != backedLayer.size.width || bounds.height != backedLayer.size.height {
             layerResized = true
         }
         adjustFonts()
@@ -568,13 +573,17 @@ class TermView: NSView {
         bounds.fill()
         if backedLayer == nil || layerResized {
             let context = NSGraphicsContext.current!.cgContext
-            backedLayer = CGLayer(context, size: self.bounds.size, auxiliaryInfo: nil)
+            let scale = layer!.contentsScale
+            let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+            print("layer created: \(size)")
+            backedLayer = CGLayer(context, size: size, auxiliaryInfo: nil)
             layerResized = false
+            updateBackedImage()
         }
         if connected {
             // Draw the backed image
-            var imgRect = dirtyRect
-            imgRect.origin.y = fontHeight * CGFloat(maxRow) - dirtyRect.origin.y - dirtyRect.size.height
+//            var imgRect = dirtyRect
+//            imgRect.origin.y = fontHeight * CGFloat(maxRow) - dirtyRect.origin.y - dirtyRect.size.height
             //backedImage.draw(at: dirtyRect.origin, from: dirtyRect, operation: .copy, fraction: 1.0)
             NSGraphicsContext.current!.cgContext.draw(backedLayer, in: self.bounds)
             

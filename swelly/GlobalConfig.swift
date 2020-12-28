@@ -56,6 +56,7 @@ class GlobalConfig {
         }
     }
     init() {
+        let scale = NSScreen.main!.backingScaleFactor
         let defaults = UserDefaults.standard
         let numColor = 10
         colorTable = [[NSColor].init(repeating: .clear, count: numColor),
@@ -94,8 +95,8 @@ class GlobalConfig {
         cellHeight = CGFloat(defaults.float(forKey: "CellHeight"))
         chineseFontName = defaults.string(forKey: "ChineseFontName") ?? "PingFang"
         englishFontName = defaults.string(forKey: "EnglishFontName") ?? "Monaco"
-        chineseFontSize = CGFloat(defaults.float(forKey: "ChineseFontSize"))
-        englishFontSize = CGFloat(defaults.float(forKey: "EnglishFontSize"))
+        chineseFontSize = CGFloat(defaults.float(forKey: "ChineseFontSize")) * scale
+        englishFontSize = CGFloat(defaults.float(forKey: "EnglishFontSize")) * scale
         chineseFontPaddingLeft = CGFloat(defaults.float(forKey:"ChinesePaddingLeft"))
         chineseFontPaddingBottom = CGFloat(defaults.float(forKey:"ChinesePaddingBottom"))
         englishFontPaddingLeft = CGFloat(defaults.float(forKey:"EnglishPaddingLeft"))
