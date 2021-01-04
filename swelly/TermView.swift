@@ -476,11 +476,14 @@ class TermView: NSView {
                         x += 1
                     }
                     let underlineColor = config.color(atIndex: Int(beginColor), highlight: beginBold)
-                    context?.beginPath()
-                    context?.setStrokeColor(underlineColor.cgColor)
-                    context?.move(to: NSPoint(x: CGFloat(begin) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
-                    context?.addLine(to: NSPoint(x: CGFloat(x) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
-                    context?.strokePath()
+                    if let context = context {
+                        context.beginPath()
+                        context.setLineWidth(scale)
+                        context.setStrokeColor(underlineColor.cgColor)
+                        context.move(to: NSPoint(x: CGFloat(begin) * fontWidth * scale, y: (CGFloat(maxRow - 1 - row) * fontHeight + 0.5) * scale))
+                        context.addLine(to: NSPoint(x: CGFloat(x) * fontWidth * scale, y: (CGFloat(maxRow - 1 - row) * fontHeight + 0.5) * scale))
+                        context.strokePath()
+                    }
                     /*
                     NSBezierPath.strokeLine(from: NSPoint(x: CGFloat(begin) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5),
                                             to: NSPoint(x: CGFloat(x) * fontWidth, y: CGFloat(maxRow - 1 - row) * fontHeight + 0.5))
