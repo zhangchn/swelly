@@ -802,11 +802,10 @@ extension TermView {
             targetFrame.size.width = min(1.2 * targetFrame.width, screen.frame.width)
             targetFrame.size.height = min(1.2 * targetFrame.height, screen.frame.height)
             window.setFrame(targetFrame, display: true)
-            //bounds.size = targetFrame.size
             if targetFrame.width > backedImage.size.width || targetFrame.height > backedImage.size.height {
                 backedImage = NSImage(size: targetFrame.size)
             }
-
+            bounds.size = targetFrame.size
             adjustFonts()
         }
     }
