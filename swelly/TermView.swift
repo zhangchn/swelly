@@ -791,6 +791,39 @@ extension TermView: NSTextInputClient {
 
 extension TermView {
     // MARK: Event handling
+    @IBAction func zoomIn(_ sender: Any?) {
+        debugPrint("zoom in")
+        if isInFullScreenMode {
+            return
+        }
+        if let window = window, let screen = window.screen {
+            
+            var targetFrame = window.frame
+            targetFrame.size.width = min(1.2 * targetFrame.width, screen.frame.width)
+            targetFrame.size.height = min(1.2 * targetFrame.height, screen.frame.height)
+            window.setFrame(targetFrame, display: true)
+            if targetFrame.width > backedImage.size.width || targetFrame.height > backedImage.size.height {
+                backedImage = NSImage(size: targetFrame.size)
+            }
+            bounds.size = targetFrame.size
+            adjustFonts()
+        }
+    }
+    
+    @IBAction func zoomOut(_ sender: Any?) {
+        debugPrint("zoom out")
+        if isInFullScreenMode {
+            return
+        }
+        if let window = window, let screen = window.screen {
+            var targetFrame = window.frame
+            targetFrame.size.width = max(0.8 * targetFrame.width, screen.frame.width / 6.0)
+            targetFrame.size.height = max(0.8 * targetFrame.height, screen.frame.height / 6.0)
+            window.setFrame(targetFrame, display: true)
+            bounds.size = targetFrame.size
+            adjustFonts()
+        }
+    }
     
     override func mouseDown(with event: NSEvent) {
         // TODO: reset mouse timer
